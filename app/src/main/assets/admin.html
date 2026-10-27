@@ -39,6 +39,16 @@ textarea{min-height:84px;resize:vertical}
 .posters .p{position:relative;aspect-ratio:4/5;border-radius:10px;overflow:hidden;background:#eee;border:1px solid var(--line)}
 .posters img{width:100%;height:100%;object-fit:cover}
 .posters .x{position:absolute;top:4px;right:4px;width:30px;height:30px;border-radius:50%;border:0;background:rgba(0,0,0,.6);color:#fff;font-size:15px}
+.posters .tg{position:absolute;left:4px;bottom:4px;border:0;border-radius:14px;padding:5px 10px;font:inherit;font-size:12px;font-weight:700;background:var(--green);color:#fff}
+.posters .p.off img{opacity:.3;filter:grayscale(1)}
+.posters .p.off .tg{background:#777}
+/* on/off switches */
+.sw{display:flex;align-items:center;justify-content:space-between;padding:10px 2px;border-bottom:1px solid var(--line);font-size:15px}
+.sw:last-child{border-bottom:0}
+.sw input{appearance:none;-webkit-appearance:none;width:48px;height:28px;border-radius:14px;background:#cfd6d2;position:relative;cursor:pointer;transition:background .2s;flex:none}
+.sw input::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.3);transition:left .2s}
+.sw input:checked{background:var(--green)}
+.sw input:checked::after{left:23px}
 .drop{display:block;border:2px dashed var(--gold);border-radius:12px;padding:18px;text-align:center;color:var(--gold);font-weight:600;cursor:pointer}
 .drop input{display:none}
 .actions{display:grid;gap:10px}
@@ -119,6 +129,12 @@ details.tip summary{cursor:pointer;color:var(--green);font-weight:600}
   </div>
   </section>
   <section class="pane" data-tab="slide">
+  <div class="card">
+    <h2>🎛️ Slide yang dipapar</h2>
+    <div class="hint">Matikan slide yang tidak mahu dipapar. Kandungannya tidak dipadam.</div>
+    <div id="slideSw"></div>
+  </div>
+
   <div class="card">
     <h2>🖼️ Poster Kuliah</h2>
     <label class="drop">＋ Pilih poster dari galeri<input type="file" id="pFile" accept="image/*" multiple></label>
@@ -271,6 +287,8 @@ function fill() {
   $('cslides').innerHTML = '';
   (cfg.slides || []).forEach(addCustom);
   $('pfullChk').checked = !!cfg.posterFull;
+  posterOff = new Set(cfg.posterOff || []);
+  showSwitches();
   showLogo(cfg.logo || '');
   showHeaderLogo();
   const L = cfg.live || {};
@@ -295,6 +313,8 @@ function collect() {
   c.slides = [...$('cslides').children].map(k => ({ t: k.querySelector('input').value.trim(), b: k.querySelector('textarea').value.trim() }))
     .filter(x => x.t || x.b);
   c.posterFull = $('pfullChk').checked;
+  c.slidesOff = [...document.querySelectorAll('#slideSw input')].filter(i => !i.checked).map(i => i.dataset.slide);
+  c.posterOff = [...posterOff].filter(n => posterNames.includes(n)).sort();   // forget deleted posters
   return c;
 }
 
@@ -341,13 +361,30 @@ function addCustom(c) {
 }
 
 /* ---------- posters ---------- */
+// Slide types the TV rotates through, in its order.
+const SLIDE_TYPES = [['scene', '🕌 Gambar masjid'], ['date', '📅 Tarikh Hijrah'], ['kuliah', '📚 Jadual kuliah'], ['poster', '🖼️ Poster'],
+  ['islam', '🌙 Ramadan & tarikh Islam'], ['custom', '📝 Pengumuman'], ['tabung', '💰 Tabung'], ['ayat', '📖 Ayat Al-Quran']];
+function showSwitches() {
+  const off = new Set(cfg.slidesOff || []);
+  $('slideSw').innerHTML = SLIDE_TYPES.map(([k, label]) =>
+    `<label class="sw"><span>${label}</span><input type="checkbox" data-slide="${k}"${off.has(k) ? '' : ' checked'}></label>`).join('');
+}
+let posterOff = new Set(), posterNames = [];
 function showPosters(names) {
+  posterNames = names;
   $('posters').innerHTML = '';
   for (const n of names) {
     const d = document.createElement('div');
-    d.className = 'p';
-    d.innerHTML = `<img loading="lazy" alt=""><button class="x" title="Padam">✕</button>`;
+    d.className = 'p' + (posterOff.has(n) ? ' off' : '');
+    d.innerHTML = `<img loading="lazy" alt=""><button class="x" title="Padam">✕</button><button class="tg"></button>`;
     d.querySelector('img').src = '/poster/' + encodeURIComponent(n);
+    const tg = d.querySelector('.tg');
+    tg.textContent = posterOff.has(n) ? 'Off' : 'On';
+    // hides this poster on the TV without deleting it (takes effect on Save)
+    tg.onclick = () => {
+      posterOff.has(n) ? posterOff.delete(n) : posterOff.add(n);
+      d.classList.toggle('off', posterOff.has(n)); tg.textContent = posterOff.has(n) ? 'Off' : 'On';
+    };
     d.querySelector('.x').onclick = async () => {
       if (!confirm('Padam poster ini dari TV?')) return;
       await api('DELETE', '/api/poster?name=' + encodeURIComponent(n));

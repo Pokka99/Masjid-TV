@@ -948,7 +948,10 @@ const customSlides = () => (cfg.slides || []).filter(c => c && (c.t || c.b));
 function loadPosters() {
   let list = [];
   try { if (window.Android && Android.posters) list = JSON.parse(Android.posters()); } catch (e) {}
-  posters = list.concat((cfg.posterUrls || '').split('\n').map(x => x.trim()).filter(Boolean));
+  // posters switched off on the phone stay stored but are not shown (matched by file name)
+  const off = new Set(cfg.posterOff || []);
+  const name = u => { try { return decodeURIComponent(u.split('/').pop()); } catch (e) { return u; } };
+  posters = list.filter(u => !off.has(name(u))).concat((cfg.posterUrls || '').split('\n').map(x => x.trim()).filter(Boolean));
 }
 
 function nextSlide() {
@@ -963,9 +966,10 @@ function nextSlide() {
     loadPosters();
     // ?slide=kuliah holds one slide, for previews and screenshots
     const only = q.get('slide');
-    const have = k => (k !== 'poster' || posters.length) && (k !== 'custom' || customSlides().length) && (k !== 'islam' || UQ);
+    const off = new Set(only ? [] : cfg.slidesOff || []);   // slide types switched off on the phone
+    const have = k => !off.has(k) && (k !== 'poster' || posters.length) && (k !== 'custom' || customSlides().length) && (k !== 'islam' || UQ);
     seq = (only && CYCLE.includes(only) ? [only] : CYCLE).filter(have);
-    if (!seq.length) seq = CYCLE.filter(k => k !== 'poster' && k !== 'custom');
+    if (!seq.length) seq = ['date'];   // everything switched off: keep the Hijri date up
     $('dots').innerHTML = seq.map(() => '<i></i>').join('');
     si = 0;
   }
