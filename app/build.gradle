@@ -10,8 +10,8 @@ android {
         applicationId 'my.masjid.tv'
         minSdk 23
         targetSdk 34
-        versionCode 3
-        versionName '1.1'
+        versionCode 4
+        versionName '1.2'
     }
 
     buildTypes {
@@ -26,4 +26,9 @@ android {
         sourceCompatibility JavaVersion.VERSION_17
         targetCompatibility JavaVersion.VERSION_17
     }
+}
+
+dependencies {
+    // WebViewAssetLoader: the page runs from an https address so YouTube and Facebook embeds work.
+    implementation 'androidx.webkit:webkit:1.12.1'
 }

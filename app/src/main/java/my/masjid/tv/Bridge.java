@@ -23,9 +23,12 @@ import java.util.TreeMap;
 
 /** window.Android on the TV page. */
 class Bridge {
+    static final String ORIGIN = "https://appassets.androidplatform.net";
+
     private final Context ctx;
     private final Store store;
     private final WebServer server;
+    private volatile String slide = "";
 
     Bridge(Context ctx, Store store, WebServer server) {
         this.ctx = ctx;
@@ -46,6 +49,16 @@ class Bridge {
         }
     }
 
+    /** The page reports which slide is up, for the phone's slide controls. */
+    @JavascriptInterface
+    public void showing(String name) {
+        slide = name == null ? "" : name;
+    }
+
+    String currentSlide() {
+        return slide;
+    }
+
     @JavascriptInterface
     public String pin() {
         return store.pin();
@@ -64,7 +77,7 @@ class Bridge {
         List<String> out = new ArrayList<>();
         for (String n : store.posterNames()) {
             try {
-                out.add("http://127.0.0.1:" + server.port() + "/poster/" + URLEncoder.encode(n, "UTF-8"));
+                out.add(ORIGIN + "/posters/" + URLEncoder.encode(n, "UTF-8"));
             } catch (Exception ignored) {
             }
         }

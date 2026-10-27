@@ -12,7 +12,7 @@
     <uses-feature android:name="android.software.leanback" android:required="false" />
     <uses-feature android:name="android.hardware.touchscreen" android:required="false" />
 
-    <!-- Cleartext: the phone page is plain http on the mosque Wi-Fi, and the TV page loads posters from 127.0.0.1. -->
+    <!-- Cleartext: a live stream given as a plain http link (e.g. a local .m3u8) can still play. -->
     <application
         android:label="@string/app_name"
         android:icon="@drawable/banner"

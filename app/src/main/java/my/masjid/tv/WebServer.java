@@ -32,6 +32,7 @@ class WebServer {
         boolean addPoster(String name, byte[] data) throws IOException;
         void deletePoster(String name);
         void runJs(String js);                   // on the TV page
+        String currentSlide();                   // e.g. "kuliah"
     }
 
     private static final int MAX_BODY = 20 << 20;
@@ -156,7 +157,7 @@ class WebServer {
             case "GET /api/state": {
                 String cfg = b.config();
                 send(out, 200, "application/json", bytes("{\"config\":" + (cfg.isEmpty() ? "{}" : cfg)
-                        + ",\"posters\":" + b.postersJson() + "}"));
+                        + ",\"posters\":" + b.postersJson() + ",\"slide\":\"" + jsonSafe(b.currentSlide()) + "\"}"));
                 return;
             }
             case "POST /api/config": {
@@ -186,6 +187,14 @@ class WebServer {
                 return;
             case "POST /api/demo":
                 b.runJs("demo()");
+                send(out, 200, "application/json", bytes(ok));
+                return;
+            case "POST /api/next":
+                b.runJs("stepSlide(1)");
+                send(out, 200, "application/json", bytes(ok));
+                return;
+            case "POST /api/prev":
+                b.runJs("stepSlide(-1)");
                 send(out, 200, "application/json", bytes(ok));
                 return;
             case "POST /api/reload":
@@ -237,6 +246,11 @@ class WebServer {
             }
         }
         return m;
+    }
+
+    /** Drops the characters that would need escaping inside a JSON string. */
+    static String jsonSafe(String s) {
+        return s == null ? "" : s.replaceAll("[\"\\\\\\p{Cntrl}]", "");
     }
 
     /** A bare file name: no folders, no leading dot. */

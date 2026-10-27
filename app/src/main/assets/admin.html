@@ -50,6 +50,10 @@ textarea{min-height:84px;resize:vertical}
 #login .btn{width:100%;margin-top:12px}
 .credit{text-align:center;font-size:12px;color:var(--mute);margin:20px 0 4px}
 .credit a{color:var(--green)}
+.btns2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.now{margin-top:10px;padding:10px 12px;border-radius:10px;background:#eef5f1;color:var(--green);font-weight:600;font-size:14px;text-align:center}
+.now.live{background:#fdecea;color:var(--red)}
+.btn.red{background:var(--red)}
 .hide{display:none!important}
 .tab{font-variant-numeric:tabular-nums}
 </style>
@@ -68,6 +72,21 @@ textarea{min-height:84px;resize:vertical}
 <header><h1 id="hName">Paparan Masjid</h1><p>Kawalan dari telefon · perubahan terus dipapar di TV</p></header>
 <main>
   <div class="card">
+    <h2>🎞️ Slide di TV</h2>
+    <div class="now" id="nowSlide">Sekarang di TV: …</div>
+    <div class="btns2"><button class="btn ghost" id="prev">◀ Sebelum</button><button class="btn" id="next">Seterusnya ▶</button></div>
+  </div>
+
+  <div class="card">
+    <h2>📺 Siaran Langsung di TV</h2>
+    <label>Pautan YouTube Live atau Facebook Live</label>
+    <input id="liveUrl" inputmode="url" placeholder="https://youtube.com/live/... atau https://facebook.com/...">
+    <div class="hint">Siaran mesti <b>Public</b>. YouTube paling stabil. Pautan saluran (youtube.com/channel/UC…/live) sentiasa memaparkan siaran terkini saluran itu. Siaran berhenti sendiri bila waktu solat dan sambung semula selepas solat; tamat sendiri selepas 4 jam. Jika TV dalam masjid yang sama dengan penceramah, matikan bunyi TV supaya tidak bergema.</div>
+    <div class="now hide" id="liveNow"></div>
+    <div class="btns2"><button class="btn" id="liveGo">▶ Papar di TV</button><button class="btn red" id="liveStop">■ Tamat</button></div>
+  </div>
+
+  <div class="card">
     <h2>💰 Tabung Mingguan</h2>
     <div class="row">
       <div><label>Kutipan minggu ini (RM)</label><input id="tw" inputmode="decimal" class="tab"></div>
@@ -85,6 +104,13 @@ textarea{min-height:84px;resize:vertical}
     <div class="hint" id="pMsg">Gambar dikecilkan secara automatik sebelum dihantar.</div>
     <div class="posters" id="posters"></div>
     <label>Pautan poster dari internet (pilihan, satu URL setiap baris)</label><textarea id="purls" placeholder="https://..."></textarea>
+  </div>
+
+  <div class="card">
+    <h2>📝 Slide Pengumuman</h2>
+    <div class="hint">Slide teks anda sendiri, contohnya program, kutipan khas atau notis. Dipapar bergilir bersama slide lain.</div>
+    <div id="cslides"></div>
+    <button class="btn ghost" id="cAdd" style="margin-top:12px;width:100%">＋ Tambah slide</button>
   </div>
 
   <div class="card">
@@ -163,8 +189,10 @@ async function load() {
   const st = await api('GET', '/api/state');
   cfg = st.config || {};
   $('login').classList.add('hide'); $('ui').classList.remove('hide');
-  fill(); showPosters(st.posters || []);
+  fill(); showPosters(st.posters || []); showNow(st.slide);
 }
+function showNow(slide) { $('nowSlide').textContent = 'Sekarang di TV: ' + (slide || '…'); }
+async function refreshNow() { try { showNow((await api('GET', '/api/state')).slide); } catch (e) {} }
 
 /* ---------- form <-> config ---------- */
 const T = { name: 'name', addr: 'addr', zone: 'zone', tick: 'ticker', purls: 'posterUrls', azan: 'azan', pre: 'pre', solat: 'solat', jumaat: 'jumaat', slide: 'slide' };
@@ -176,6 +204,13 @@ function fill() {
   $('tw').value = tb.week || ''; $('tl').value = tb.last || ''; $('tt').value = tb.total || ''; $('tn').value = tb.note || '';
   $('kul').innerHTML = '';
   (cfg.kuliah || '').split('\n').map(l => l.split('|').map(x => x.trim())).filter(r => r[0]).forEach(addKuliah);
+  $('cslides').innerHTML = '';
+  (cfg.slides || []).forEach(addCustom);
+  const L = cfg.live || {};
+  $('liveUrl').value = L.url || '';
+  $('liveNow').classList.toggle('hide', !L.on);
+  $('liveNow').textContent = '🔴 Sedang dipapar di TV';
+  $('liveNow').classList.add('live');
 }
 function collect() {
   const num = (id, d) => { const n = parseInt($(id).value); return isNaN(n) || n < 0 ? d : n; };
@@ -187,6 +222,8 @@ function collect() {
   c.tabung = { week: $('tw').value.trim(), last: $('tl').value.trim(), total: $('tt').value.trim(), note: $('tn').value.trim() };
   c.kuliah = [...$('kul').children].map(k => [...k.querySelectorAll('[data-f]')].map(e => e.value.replace(/\|/g, '/').trim()))
     .filter(r => r[2] || r[3]).map(r => r.join(' | ')).join('\n');
+  c.slides = [...$('cslides').children].map(k => ({ t: k.querySelector('input').value.trim(), b: k.querySelector('textarea').value.trim() }))
+    .filter(x => x.t || x.b);
   return c;
 }
 
@@ -202,6 +239,16 @@ function addKuliah(r) {
   f[0].value = r[1] || ''; f[1].value = r[2] || ''; f[2].value = r[3] || '';
   d.querySelector('.x').onclick = () => d.remove();
   $('kul').appendChild(d);
+}
+
+function addCustom(c) {
+  const d = document.createElement('div');
+  d.className = 'k';
+  d.innerHTML = `<button class="x" title="Buang">✕</button><label>Tajuk</label><input><label>Teks</label><textarea></textarea>`;
+  d.querySelector('input').value = (c && c.t) || '';
+  d.querySelector('textarea').value = (c && c.b) || '';
+  d.querySelector('.x').onclick = () => d.remove();
+  $('cslides').appendChild(d);
 }
 
 /* ---------- posters ---------- */
@@ -254,6 +301,24 @@ $('pFile').onchange = async e => {
 };
 
 /* ---------- buttons ---------- */
+$('cAdd').onclick = () => { addCustom(); $('cslides').lastChild.querySelector('input').focus(); };
+$('next').onclick = () => api('POST', '/api/next').then(() => setTimeout(refreshNow, 700)).catch(() => {});
+$('prev').onclick = () => api('POST', '/api/prev').then(() => setTimeout(refreshNow, 700)).catch(() => {});
+async function saveLive(on) {
+  const url = $('liveUrl').value.trim();
+  if (on && !/^https?:\/\/\S*(youtube\.com|youtu\.be|facebook\.com|fb\.watch|\.m3u8|\.mp4)/i.test(url))
+    return toast('Tampal pautan YouTube atau Facebook yang penuh (bermula https://)');
+  try {
+    cfg = collect();
+    cfg.live = { url, on, since: Date.now() };
+    await api('POST', '/api/config', JSON.stringify(cfg), 'application/json');
+    $('liveNow').classList.toggle('hide', !on);
+    toast(on ? 'Siaran dipapar di TV ✓' : 'Siaran ditamatkan; TV kembali ke slide');
+    setTimeout(refreshNow, 1500);
+  } catch (e) { if (e.message !== 'pin') toast('Gagal: ' + e.message); }
+}
+$('liveGo').onclick = () => saveLive(true);
+$('liveStop').onclick = () => saveLive(false);
 $('kAdd').onclick = () => { addKuliah(); $('kul').lastChild.querySelector('input').focus(); };
 $('newWeek').onclick = () => {
   if (!$('tw').value.trim()) return toast('Kutipan minggu ini masih kosong');

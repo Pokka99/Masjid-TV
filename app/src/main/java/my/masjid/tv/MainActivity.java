@@ -10,17 +10,25 @@ import android.os.Bundle;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.WindowManager;
+import android.webkit.WebResourceRequest;
+import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
+import androidx.webkit.WebViewAssetLoader;
+
 import java.io.IOException;
 import java.io.InputStream;
 
-/** Full-screen kiosk showing the mosque display page from assets/index.html. */
+/**
+ * Full-screen kiosk showing the mosque display page from assets/index.html, served from
+ * https://appassets.androidplatform.net so live-stream embeds (YouTube refuses file:// pages) can play.
+ */
 public class MainActivity extends Activity {
     private WebView web;
     private WebServer server;
+    private Bridge bridge;
 
     @SuppressLint("SetJavaScriptEnabled")
     @Override
@@ -51,14 +59,25 @@ public class MainActivity extends Activity {
             @Override public boolean addPoster(String name, byte[] data) throws IOException { return store.addPoster(name, data); }
             @Override public void deletePoster(String name) { store.deletePoster(name); }
             @Override public void runJs(String js) { runOnUiThread(() -> web.evaluateJavascript(js, null)); }
+            @Override public String currentSlide() { return bridge.currentSlide(); }
         });
         server.start();
-        web.addJavascriptInterface(new Bridge(this, store, server), "Android");
-        web.setWebViewClient(new WebViewClient());
+        bridge = new Bridge(this, store, server);
+        web.addJavascriptInterface(bridge, "Android");
+        WebViewAssetLoader loader = new WebViewAssetLoader.Builder()
+                .addPathHandler("/assets/", new WebViewAssetLoader.AssetsPathHandler(this))
+                .addPathHandler("/posters/", new WebViewAssetLoader.InternalStoragePathHandler(this, store.posterDir()))
+                .build();
+        web.setWebViewClient(new WebViewClient() {
+            @Override
+            public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
+                return loader.shouldInterceptRequest(request.getUrl());
+            }
+        });
         web.setBackgroundColor(0xFF062A20);
         setContentView(web);
         hideBars();
-        web.loadUrl("file:///android_asset/index.html");
+        web.loadUrl(Bridge.ORIGIN + "/assets/index.html");
 
         String perm = Build.VERSION.SDK_INT >= 33 ? Manifest.permission.READ_MEDIA_IMAGES
                 : Manifest.permission.READ_EXTERNAL_STORAGE;

@@ -117,6 +117,19 @@ aside{display:flex;flex-direction:column;gap:1.6vh;min-height:0}
 .ticker span{display:inline-block;padding-left:100%;animation:tick 40s linear infinite}
 @keyframes tick{to{transform:translateX(-100%)}}
 
+/* announcement slides added from the phone */
+.s-custom{text-align:center;align-items:center}
+.s-custom h2{font-size:7vh;color:var(--gold);line-height:1.15;max-width:92%}
+.s-custom .cb{font-size:3.4vh;margin-top:3vh;white-space:pre-line;line-height:1.5;max-width:90%}
+.s-custom .cb.long{font-size:2.6vh}
+
+/* live stream from a link, full screen */
+#live{position:fixed;inset:0;z-index:16;background:#000;display:none}
+#live.on{display:block}
+#liveBox,#liveBox iframe,#liveBox video{position:absolute;inset:0;width:100%;height:100%;border:0}
+.live-chip .dot{width:1.4vh;height:1.4vh;border-radius:50%;background:#e53935;animation:pulse2 1.2s infinite}
+.live-chip .lv{color:#ff6b5e;font-weight:700;letter-spacing:.12em;font-size:2vh}
+
 /* landscape poster, full screen */
 #pfull{position:fixed;inset:0;z-index:15;background:#000;opacity:0;visibility:hidden;transition:opacity 1s,visibility 0s 1s;
   display:flex;align-items:center;justify-content:center;overflow:hidden}
@@ -274,6 +287,7 @@ aside{display:flex;flex-direction:column;gap:1.6vh;min-height:0}
         <div class="tag">Jadual Kuliah</div><h2>Kuliah &amp; Pengajian Minggu Ini</h2><div class="kl" id="kl"></div>
       </div>
       <div class="slide s-poster" data-k="poster"><div class="pbg" id="pBg"></div><img id="pImg" alt=""></div>
+      <div class="slide s-custom" data-k="custom"><div class="tag">Pengumuman</div><h2 id="cT"></h2><div class="cb" id="cB"></div></div>
       <div class="slide s-tabung" data-k="tabung">
         <div class="tag">Tabung Masjid</div>
         <div class="lbl">Kutipan Minggu Ini</div>
@@ -304,6 +318,10 @@ aside{display:flex;flex-direction:column;gap:1.6vh;min-height:0}
   <div class="ticker"><span id="tick"></span></div>
 </div>
 
+<div id="live">
+  <div id="liveBox"></div>
+  <div class="pf-chip live-chip"><i class="dot"></i><span class="lv">LANGSUNG</span><b id="lvClock"></b><span id="lvNext"></span></div>
+</div>
 <div id="pfull">
   <div class="pbg" id="pfBg"></div><img id="pfImg" alt="">
   <div class="pf-chip"><b id="pfClock"></b><span id="pfNext"></span></div>
@@ -487,6 +505,7 @@ saveCfg();   // first run: give the phone page the full defaults to edit
 window.applyConfig = () => {
   const zone = cfg.zone;
   cfg = loadCfg(); store.set('cfg', cfg);
+  syncLive();
   seq = []; render(true);
   if (cfg.zone !== zone) fetchYear(true);
   if ($('set').classList.contains('on')) openSettings();
@@ -668,6 +687,16 @@ function render(force) {
   }
   renderTimes(s, t);
   if ($('scene').classList.contains('on')) renderScene(s, t);
+  if (liveUrl) {
+    syncLive();
+    // prayer screens sit on top; drop the stream (and its sound) until they close, then rejoin live
+    const pause = !!ov;
+    if (pause !== livePaused) { livePaused = pause; liveSrc(!pause); }
+    if (s.next) {
+      $('lvClock').textContent = hm(t);
+      $('lvNext').textContent = `${s.next.n} ${hm(s.next.t)}`;
+    }
+  }
   if ($('pfull').classList.contains('on') && s.next) {
     $('pfClock').textContent = hm(t);
     const m = Math.max(0, Math.ceil((s.next.t - t) / 60e3));
@@ -795,8 +824,10 @@ const esc = s => s.replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&
 const slides = {};
 document.querySelectorAll('.slide').forEach(el => slides[el.dataset.k] = el);
 // One cycle; each 'poster' slot shows the next poster, and is dropped when there are none.
-const CYCLE = ['scene', 'date', 'kuliah', 'poster', 'tabung', 'scene', 'ayat', 'poster'];
-let seq = [], si = -1, ai = Math.floor(Math.random() * AYAT.length), pi = -1, posters = [], slideTimer;
+const CYCLE = ['scene', 'date', 'kuliah', 'poster', 'custom', 'tabung', 'scene', 'ayat', 'poster', 'custom'];
+const SLIDE_NAMES = { scene: 'Gambar masjid', date: 'Tarikh Hijrah', kuliah: 'Jadual kuliah', poster: 'Poster', custom: 'Pengumuman', tabung: 'Tabung masjid', ayat: 'Ayat Al-Quran' };
+let seq = [], si = -1, ai = Math.floor(Math.random() * AYAT.length), pi = -1, ci = -1, posters = [], slideTimer;
+const customSlides = () => (cfg.slides || []).filter(c => c && (c.t || c.b));
 
 // Images in a folder named "Poster" on the TV or a pendrive (via the Android side), then any URLs from settings.
 function loadPosters() {
@@ -806,13 +837,20 @@ function loadPosters() {
 }
 
 function nextSlide() {
+  clearTimeout(slideTimer);
+  if (liveUrl) {   // the live stream covers the slides; just check back later
+    slideTimer = setTimeout(nextSlide, 5000);
+    report('Siaran langsung');
+    return;
+  }
   si++;
   if (si >= seq.length) {
     loadPosters();
     // ?slide=kuliah holds one slide, for previews and screenshots
     const only = q.get('slide');
-    seq = (only && CYCLE.includes(only) ? [only] : CYCLE).filter(k => k !== 'poster' || posters.length);
-    if (!seq.length) seq = CYCLE.filter(k => k !== 'poster');
+    const have = k => (k !== 'poster' || posters.length) && (k !== 'custom' || customSlides().length);
+    seq = (only && CYCLE.includes(only) ? [only] : CYCLE).filter(have);
+    if (!seq.length) seq = CYCLE.filter(k => k !== 'poster' && k !== 'custom');
     $('dots').innerHTML = seq.map(() => '<i></i>').join('');
     si = 0;
   }
@@ -838,13 +876,74 @@ function nextSlide() {
     };
     probe.src = src;
   }
+  if (k === 'custom') {
+    const list = customSlides(), c = list[ci = (ci + 1) % list.length];
+    $('cT').textContent = c.t || ''; $('cB').textContent = c.b || '';
+    $('cB').classList.toggle('long', (c.b || '').length > 180);
+  }
   $('pfull').classList.remove('on');
+  report(`${SLIDE_NAMES[k] || k} (${si + 1}/${seq.length})`);
   if (k === 'scene') { prepareScene(); renderScene(state(now()), now()); }
   $('scene').classList.toggle('on', k === 'scene');
   if (k !== 'scene') for (const key in slides) slides[key].classList.toggle('on', key === k);
   [...$('dots').children].forEach((d, i) => d.classList.toggle('on', i === si));
   const ms = (k === 'scene' ? 2 : k === 'ayat' || k === 'poster' ? 1.6 : 1) * Math.max(5, cfg.slide) * 1000;
-  clearTimeout(slideTimer); slideTimer = setTimeout(nextSlide, ms);
+  slideTimer = setTimeout(nextSlide, ms);
+}
+// Tells the app which slide is up, for the phone's slide controls.
+function report(name) { try { A && A.showing(name); } catch (e) {} }
+// From the phone: 1 = next slide, -1 = previous.
+window.stepSlide = dir => {
+  if (liveUrl || !seq.length) return;
+  if (dir < 0) { si -= 2; if (si < -1) si = seq.length - 2; }
+  nextSlide();
+};
+
+/* ---------- live stream from a link ---------- */
+// A YouTube or Facebook link (or a direct .m3u8/.mp4) to what goes on screen; null when not recognised.
+function liveEmbed(link) {
+  let u, m;
+  try { u = new URL(String(link).trim()); } catch (e) { return null; }
+  const h = u.hostname.replace(/^(www|m)\./, '');
+  const yt = id => (id = id.replace(/[^\w-]/g, '')) ? { frame: `https://www.youtube.com/embed/${id}?autoplay=1&controls=0&rel=0&playsinline=1` } : null;
+  if (h === 'youtu.be') return yt(u.pathname.slice(1));
+  if (h === 'youtube.com') {
+    if (u.searchParams.get('v')) return yt(u.searchParams.get('v'));
+    if ((m = u.pathname.match(/^\/(live|embed|shorts)\/([\w-]+)/))) return yt(m[2]);
+    // a channel's own live page keeps working for every new stream
+    if ((m = u.pathname.match(/^\/channel\/(UC[\w-]+)/))) return { frame: `https://www.youtube.com/embed/live_stream?channel=${m[1]}&autoplay=1&controls=0&playsinline=1` };
+    return null;
+  }
+  if (/(^|\.)facebook\.com$/.test(h) || h === 'fb.watch')
+    return { frame: 'https://www.facebook.com/plugins/video.php?href=' + encodeURIComponent(u.href) + '&show_text=false&autoplay=true&mute=0&width=1920&height=1080' };
+  if (/\.(m3u8|mp4|webm)$/i.test(u.pathname)) return { video: u.href };
+  return null;
+}
+let liveUrl = '', livePaused = false;
+function liveSrc(play) {
+  const box = $('liveBox');
+  box.textContent = '';
+  const e = play && liveEmbed(liveUrl);
+  if (!e) return;
+  const el = document.createElement(e.video ? 'video' : 'iframe');
+  if (e.video) { el.autoplay = true; el.playsInline = true; }
+  else { el.allow = 'autoplay; encrypted-media; picture-in-picture'; el.referrerPolicy = 'strict-origin-when-cross-origin'; }
+  el.src = e.video || e.frame;
+  box.appendChild(el);
+}
+// Starts or stops the stream to match the settings; stops by itself after cfg.liveMax hours.
+function syncLive() {
+  const L = cfg.live || {};
+  let want = L.on && L.url && liveEmbed(L.url) ? L.url : '';
+  if (want && L.since && Date.now() - L.since > (+cfg.liveMax || 4) * 3600e3) {
+    want = ''; cfg.live.on = false; saveCfg();
+  }
+  if (want === liveUrl) return;
+  liveUrl = want; livePaused = false;
+  $('live').classList.toggle('on', !!want);
+  liveSrc(!!want);
+  if (!want) { seq = []; nextSlide(); }
+  else report('Siaran langsung');
 }
 
 /* ---------- settings ---------- */
@@ -916,6 +1015,7 @@ document.addEventListener('keydown', e => {
 function toast(m) { const t = $('toast'); t.textContent = m; t.style.display = 'block'; clearTimeout(toast.h); toast.h = setTimeout(() => t.style.display = 'none', 4000); }
 
 /* ---------- start ---------- */
+syncLive();
 render(true);
 nextSlide();
 setInterval(() => {

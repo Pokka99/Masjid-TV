@@ -42,11 +42,13 @@ Skrin paparan masjid untuk TV Android, satu fail `app/src/main/assets/index.html
 - **Slide gambar masjid** skrin penuh: jam besar, tarikh Masihi/Hijrah, 5 waktu, kiraan ke solat seterusnya, ayat; 13 gambar masjid (Wikimedia Commons, kredit dipapar) bergilir.
 - **Slide automatik**: Tarikh Hijrah (Rumi + Jawi), Jadual Kuliah (hari ini ditanda), Kutipan Tabung mingguan (+ perbandingan minggu lepas), Ayat Al-Quran (10 ayat, teks Arab + terjemahan Kemenag RI).
 - **Poster kuliah**: gambar dalam folder bernama `Poster` dipapar sebagai slide (2 kali setiap pusingan, bergilir).
+- **Slide pengumuman** sendiri (tajuk + teks), ditambah dari telefon.
+- **Siaran langsung di TV**: tampal pautan YouTube Live atau Facebook Live di telefon → TV papar skrin penuh. Berhenti sendiri ketika azan, iqamah dan solat, kemudian sambung semula; tamat sendiri selepas 4 jam.
 - Teks bergerak untuk pengumuman. Hidup sendiri bila TV dibuka; skrin tidak tidur.
 
 ## Kawal dari telefon
 Tekan **MENU** pada remote → imbas **kod QR** di penjuru kanan atas dengan kamera telefon (telefon mesti guna Wi-Fi yang sama dengan TV).
-Halaman telefon boleh: ubah kutipan tabung (ada butang "Minggu baharu"), muat naik / padam poster dari galeri, edit jadual kuliah,
+Halaman telefon boleh: tukar slide di TV (◀ ▶, dengan nama slide semasa), papar siaran langsung, tambah slide pengumuman, ubah kutipan tabung (ada butang "Minggu baharu"), muat naik / padam poster dari galeri, edit jadual kuliah,
 pengumuman, nama masjid, zon, minit iqamah, dan **uji animasi azan & iqamah** di TV.
 Dilindungi PIN 6 digit (dipapar di TV); 10 cubaan salah = dikunci 5 minit.
 
@@ -70,6 +72,11 @@ Simpan gambar (JPG/PNG) dalam folder bernama **`Poster`**. Ada 3 cara:
 3. **Pautan internet** — dalam Tetapan, isi "Pautan poster" (satu URL gambar setiap baris).
 
 Poster baharu muncul dalam pusingan slide seterusnya. Kali pertama app dibuka, benarkan akses gambar bila TV bertanya.
+
+## Siaran langsung di TV
+- Pautan yang diterima: `youtube.com/watch?v=…`, `youtu.be/…`, `youtube.com/live/…`, `youtube.com/channel/UC…/live` (sentiasa siaran terkini saluran itu), pautan video Facebook, atau terus `.m3u8`/`.mp4`.
+- Siaran mesti **Public**. YouTube lebih stabil daripada Facebook.
+- Live internet lewat 10–30 saat: jika TV dalam masjid yang sama dengan penceramah, matikan bunyi TV supaya tidak bergema.
 
 ## Pasang
 ```
