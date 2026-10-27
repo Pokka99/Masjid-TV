@@ -236,12 +236,7 @@ aside{display:flex;flex-direction:column;gap:1.6vh;min-height:0}
 .play .in4{animation:rise 1.1s 1.4s cubic-bezier(.2,.8,.2,1) both}
 @keyframes rise{from{opacity:0;transform:translateY(5vh)}}
 @keyframes zoom{from{opacity:0;transform:scale(.55)}}
-/* azan: expanding rings behind a slowly turning star */
-.rings{position:absolute;left:50%;top:50%}
-.rings i{position:absolute;left:-40vh;top:-40vh;width:80vh;height:80vh;border-radius:50%;border:.4vh solid rgba(227,193,90,.55);
-  opacity:0;animation:ring 6s ease-out infinite}
-.rings i:nth-child(2){animation-delay:2s}.rings i:nth-child(3){animation-delay:4s}
-@keyframes ring{0%{transform:scale(.25);opacity:.9}100%{transform:scale(1.9);opacity:0}}
+/* turning star behind the countdown screens */
 .star{position:absolute;left:50%;top:50%;width:120vh;height:120vh;margin:-60vh 0 0 -60vh;opacity:.12;animation:spin 120s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 /* countdown ring (iqamah and the last minute before azan) */
@@ -255,6 +250,7 @@ aside{display:flex;flex-direction:column;gap:1.6vh;min-height:0}
 @keyframes breathe{50%{box-shadow:0 0 12vh rgba(227,193,90,.6)}}
 .pop{animation:pop .9s ease-out}
 @keyframes pop{0%{transform:scale(1.4)}100%{transform:scale(1)}}
+#azan{background:linear-gradient(180deg,#0f5a40,#062a20)}
 #iq{transition:background .8s}
 #iq.saf{background:radial-gradient(circle at 50% 45%,#6b4d10,#1d1405 72%)}
 #iq.saf .prog{stroke:var(--warn)}
@@ -397,11 +393,6 @@ aside{display:flex;flex-direction:column;gap:1.6vh;min-height:0}
   </div>
 </div>
 <div class="ov" id="azan">
-  <svg class="star" viewBox="-50 -50 100 100" aria-hidden="true"><g fill="none" stroke="#e3c15a" stroke-width=".35">
-    <rect x="-30" y="-30" width="60" height="60"/><rect x="-30" y="-30" width="60" height="60" transform="rotate(45)"/>
-    <rect x="-19" y="-19" width="38" height="38" transform="rotate(22.5)"/><rect x="-19" y="-19" width="38" height="38" transform="rotate(67.5)"/>
-    <circle r="23"/><circle r="44"/><circle r="12"/></g></svg>
-  <div class="rings"><i></i><i></i><i></i></div>
   <div class="nm" id="azNm"></div><div class="clk" id="azClk"></div>
   <div class="content">
     <div class="o1 in1">Telah masuk waktu</div>
