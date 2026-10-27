@@ -87,23 +87,23 @@ main{display:grid;grid-template-columns:1fr 30vw;gap:1.6vw;min-height:0}
 
 /* side */
 aside{display:flex;flex-direction:column;gap:1.6vh;min-height:0}
-.next{flex:1;background:linear-gradient(160deg,#17704f,#0d4a35);border:1px solid var(--line);border-radius:2vh;
-  padding:3vh 2vw;display:flex;flex-direction:column;justify-content:center;text-align:center}
+.next{flex:1;min-height:0;overflow:hidden;box-shadow:0 1vh 3vh rgba(0,0,0,.35);background:linear-gradient(160deg,#17704f,#0d4a35);border:1px solid var(--line);border-radius:2vh;
+  padding:2vh 2vw;display:flex;flex-direction:column;justify-content:center;text-align:center}
 .next .l{font-size:2.3vh;letter-spacing:.25em;color:var(--mute);text-transform:uppercase}
-.next .n{font-size:7vh;font-weight:800;color:var(--gold);margin-top:.5vh}
-.next .na{font-size:4vh;color:var(--gold)}
-.next .at{font-size:3.4vh;margin-top:.5vh}
-.next .cd{font-size:9vh;font-weight:700;font-variant-numeric:tabular-nums;margin-top:1.5vh;line-height:1}
+.next .n{font-size:6.4vh;font-weight:800;color:var(--gold);margin-top:.3vh;line-height:1.15}
+.next .na{font-size:3.6vh;color:var(--gold);line-height:1.3}
+.next .at{font-size:3vh;margin-top:.3vh}
+.next .cd{font-size:8.4vh;font-weight:700;font-variant-numeric:tabular-nums;margin-top:1vh;line-height:1}
 .next .cl{font-size:2vh;color:var(--mute);margin-top:.6vh}
 .next.alert{animation:pulse 1.6s ease-in-out infinite;background:linear-gradient(160deg,#9a6b12,#5d3f08)}
 @keyframes pulse{50%{box-shadow:0 0 4vh rgba(227,193,90,.7)}}
-.iqinfo{background:var(--card);border:1px solid var(--line);border-radius:2vh;padding:2vh 1.6vw;font-size:2.2vh;color:var(--mute);text-align:center}
-.iqinfo .g{display:grid;grid-template-columns:repeat(5,1fr);margin-top:1vh}
+.iqinfo{flex:none;background:var(--card);border:1px solid var(--line);border-radius:2vh;padding:1.4vh 1.6vw;box-shadow:0 1vh 3vh rgba(0,0,0,.35);font-size:2.2vh;color:var(--mute);text-align:center}
+.iqinfo .g{display:grid;grid-template-columns:repeat(5,1fr);margin-top:.6vh}
 .iqinfo .g div{font-size:1.8vh}.iqinfo b{display:block;color:var(--gold);font-size:3.4vh}
 
 /* prayer row */
 .times{display:grid;grid-template-columns:repeat(7,1fr);gap:1vw;margin-top:1.2vh}
-.pt{background:var(--card);border:1px solid var(--line);border-radius:1.8vh;display:flex;flex-direction:column;
+.pt{background:var(--card);border:1px solid var(--line);border-radius:1.8vh;box-shadow:0 1vh 2.5vh rgba(0,0,0,.3);display:flex;flex-direction:column;
   align-items:center;justify-content:center;position:relative;transition:.5s}
 .pt .pn{font-size:2.8vh;font-weight:600;letter-spacing:.05em}
 .pt .pa{font-size:2.6vh;color:var(--gold);margin-top:.2vh}
