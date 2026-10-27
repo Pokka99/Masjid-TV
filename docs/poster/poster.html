@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="ms"><head><meta charset="utf-8">
+<!-- Poster README. Render: Chrome headless 1600x900 -> docs/poster.jpg -->
+<style>
+@font-face{font-family:Amiri;src:url(../../app/src/main/assets/fonts/AmiriQuran.ttf)}
+:root{--gold:#e3c15a;--gold2:#b8902a;--text:#f6f1e1;--mute:#b9c8bf;--hi:#1f7a5a}
+*{box-sizing:border-box;margin:0}
+html,body{width:1600px;height:900px;overflow:hidden}
+body{font-family:-apple-system,"Helvetica Neue",Arial,sans-serif;color:var(--text);
+  background:radial-gradient(circle at 78% 40%,#1d6b4f 0,#0d3a2b 38%,#06201a 75%);position:relative}
+.pat{position:absolute;inset:0;opacity:.07}
+.glow{position:absolute;width:900px;height:900px;right:-120px;top:-140px;border-radius:50%;
+  background:radial-gradient(circle,rgba(227,193,90,.22),transparent 60%)}
+.arch{position:absolute;left:0;right:0;bottom:0;height:10px;background:linear-gradient(90deg,var(--gold2),var(--gold),var(--gold2))}
+.left{position:absolute;left:90px;top:84px;width:640px}
+.badge{display:inline-flex;gap:10px;align-items:center;font-size:19px;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--gold);border:1.5px solid rgba(227,193,90,.5);padding:9px 18px;border-radius:40px;background:rgba(0,0,0,.18)}
+.ar{font-family:Amiri;font-size:64px;color:var(--gold);line-height:1;margin:34px 0 0;direction:rtl;text-align:left}
+h1{font-family:Georgia,"Times New Roman",serif;font-size:124px;line-height:1;font-weight:700;letter-spacing:-.01em;margin-top:6px;
+  background:linear-gradient(180deg,#fff3c4,var(--gold) 55%,var(--gold2));-webkit-background-clip:text;color:transparent}
+.tag{font-size:29px;line-height:1.4;color:var(--text);margin-top:22px;max-width:600px}
+.tag b{color:var(--gold);font-weight:600}
+.feat{display:grid;grid-template-columns:1fr 1fr;gap:18px 24px;margin-top:40px;width:660px}
+.f{display:flex;align-items:center;gap:14px;font-size:21px;color:var(--mute);white-space:nowrap}
+.f i{flex:none;width:44px;height:44px;border-radius:12px;display:grid;place-items:center;font-style:normal;font-size:22px;
+  background:rgba(227,193,90,.13);border:1px solid rgba(227,193,90,.35)}
+.foot{position:absolute;left:90px;bottom:62px;display:flex;align-items:center;gap:22px}
+.dl{font-size:22px;font-weight:700;color:#08241b;background:linear-gradient(180deg,#f3d77a,var(--gold2));padding:14px 26px;border-radius:12px;
+  box-shadow:0 8px 24px rgba(0,0,0,.35)}
+.by{font-size:20px;color:var(--mute)} .by b{color:var(--text)}
+/* TV */
+.tv{position:absolute;left:770px;top:150px;width:760px}
+.scr{background:#050505;padding:14px;border-radius:16px;box-shadow:0 0 0 2px #2a2a2a,0 40px 80px rgba(0,0,0,.6),0 0 120px rgba(227,193,90,.15)}
+.scr img{display:block;width:100%;border-radius:4px}
+.stand{width:220px;height:46px;margin:0 auto;background:linear-gradient(#1a1a1a,#0b0b0b);clip-path:polygon(38% 0,62% 0,100% 100%,0 100%)}
+.base{width:300px;height:10px;margin:0 auto;border-radius:6px;background:#111}
+/* phone */
+.ph{position:absolute;left:1340px;top:380px;width:220px;height:440px;border-radius:34px;background:#0a0a0a;padding:9px;
+  box-shadow:0 0 0 2px #333,0 30px 60px rgba(0,0,0,.7)}
+.ph img{width:100%;height:100%;object-fit:cover;object-position:top;border-radius:26px;display:block}
+.wifi{position:absolute;left:1240px;top:560px;font-size:15px;color:var(--gold);letter-spacing:.08em;text-transform:uppercase;
+  transform:rotate(-90deg);transform-origin:left top;opacity:.85}
+.chip{position:absolute;background:rgba(6,32,26,.85);border:1px solid rgba(227,193,90,.45);border-radius:14px;padding:12px 18px;
+  font-size:18px;box-shadow:0 12px 30px rgba(0,0,0,.45);backdrop-filter:blur(4px)}
+.chip b{color:var(--gold);display:block;font-size:24px}
+</style></head><body>
+<svg class="pat" width="1600" height="900"><defs><pattern id="p" width="80" height="80" patternUnits="userSpaceOnUse">
+<g fill="none" stroke="#e3c15a" stroke-width="1.4"><rect x="20" y="20" width="40" height="40"/><rect x="20" y="20" width="40" height="40" transform="rotate(45 40 40)"/>
+<circle cx="40" cy="40" r="9"/><path d="M0 0L20 20M80 0L60 20M0 80L20 60M80 80L60 60"/></g></pattern></defs>
+<rect width="1600" height="900" fill="url(#p)"/></svg>
+<div class="glow"></div>
+
+<div class="left">
+  <span class="badge">Android TV · Percuma · Sumber terbuka</span>
+  <div class="ar">بيت الله</div>
+  <h1>Masjid TV</h1>
+  <p class="tag">Paparan <b>waktu solat JAKIM</b> untuk masjid &amp; surau — dikemas kini terus <b>dari telefon</b>.</p>
+  <div class="feat">
+    <div class="f"><i>🕌</i>Waktu solat &amp; tarikh Hijrah</div>
+    <div class="f"><i>⏱</i>Animasi azan &amp; iqamah</div>
+    <div class="f"><i>📋</i>Jadual &amp; poster kuliah</div>
+    <div class="f"><i>💰</i>Kutipan tabung mingguan</div>
+    <div class="f"><i>📖</i>Ayat Al-Quran bergilir</div>
+    <div class="f"><i>📡</i>Siaran langsung YouTube/FB</div>
+  </div>
+</div>
+<div class="foot">
+  <span class="dl">⬇ Muat turun APK percuma</span>
+  <span class="by">github.com/<b>Pokka99/Masjid-TV</b></span>
+</div>
+
+<div class="tv">
+  <div class="scr"><img src="../screenshots/01-gambar.jpg"></div>
+  <div class="stand"></div><div class="base"></div>
+</div>
+<div class="chip" style="left:720px;top:96px"><b>Iqamah 5 minit</b>kiraan detik skrin penuh</div>
+<div class="chip" style="left:1300px;top:84px"><b>Countdown Ramadan</b>&amp; tarikh penting Islam</div>
+<div class="ph"><img src="../screenshots/13-telefon.jpg"></div>
+<div class="arch"></div>
+</body></html>

@@ -2,11 +2,7 @@
 
 Dicipta oleh **Pokka99**. Lesen [Apache 2.0](LICENSE): bebas diguna dan diubah suai, tetapi fail [NOTICE](NOTICE) (kredit pencipta) mesti dikekalkan dalam setiap salinan dan fork.
 
-<p align="center">
-  <img src="docs/screenshots/01-gambar.jpg" width="32%" alt="Slide gambar masjid: jam emas, tarikh Masihi dan Hijrah, lima waktu solat dan ayat Al-Quran">
-  <img src="docs/screenshots/08-azan.jpg" width="32%" alt="Skrin azan: Telah masuk waktu Asar">
-  <img src="docs/screenshots/10-saf.jpg" width="32%" alt="Minit terakhir iqamah: luruskan dan rapatkan saf">
-</p>
+<p align="center"><a href="https://github.com/Pokka99/Masjid-TV/releases/latest"><img src="docs/poster.jpg" alt="Poster Masjid TV: paparan waktu solat JAKIM untuk masjid dan surau di Android TV, dikawal dari telefon"></a></p>
 
 **[⬇ Muat turun APK terkini](https://github.com/Pokka99/Masjid-TV/releases/latest)**
 
