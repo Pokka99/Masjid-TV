@@ -92,6 +92,7 @@ textarea{min-height:84px;resize:vertical}
     <label>Pautan YouTube Live atau Facebook Live</label>
     <input id="liveUrl" inputmode="url" placeholder="https://youtube.com/live/... atau https://facebook.com/...">
     <div class="hint">Siaran mesti <b>Public</b>. YouTube paling stabil. Pautan saluran (youtube.com/channel/UC…/live) sentiasa memaparkan siaran terkini saluran itu. Siaran berhenti sendiri bila waktu solat dan sambung semula selepas solat; tamat sendiri selepas 4 jam. Jika TV dalam masjid yang sama dengan penceramah, matikan bunyi TV supaya tidak bergema.</div>
+    <label class="chk"><input type="checkbox" id="liveMute"> 🔇 Tanpa bunyi (sesuai jika TV dalam masjid yang sama dengan penceramah)</label>
     <div class="now hide" id="liveNow"></div>
     <div class="btns2"><button class="btn" id="liveGo">▶ Papar di TV</button><button class="btn red" id="liveStop">■ Tamat</button></div>
   </div>
@@ -225,6 +226,7 @@ function fill() {
   showLogo(cfg.logo || '');
   const L = cfg.live || {};
   $('liveUrl').value = L.url || '';
+  $('liveMute').checked = !!L.mute;
   $('liveNow').classList.toggle('hide', !L.on);
   $('liveNow').textContent = '🔴 Sedang dipapar di TV';
   $('liveNow').classList.add('live');
@@ -374,14 +376,16 @@ async function saveLive(on) {
     return toast('Tampal pautan YouTube atau Facebook yang penuh (bermula https://)');
   try {
     cfg = collect();
-    cfg.live = { url, on, since: Date.now() };
+    cfg.live = { url, on, since: on && cfg.live && cfg.live.on && cfg.live.url === url ? cfg.live.since : Date.now(), mute: $('liveMute').checked };
     await api('POST', '/api/config', JSON.stringify(cfg), 'application/json');
     $('liveNow').classList.toggle('hide', !on);
-    toast(on ? 'Siaran dipapar di TV ✓' : 'Siaran ditamatkan; TV kembali ke slide');
+    toast(on ? `Siaran dipapar di TV ✓${cfg.live.mute ? ' (tanpa bunyi)' : ''}` : 'Siaran ditamatkan; TV kembali ke slide');
     setTimeout(refreshNow, 1500);
   } catch (e) { if (e.message !== 'pin') toast('Gagal: ' + e.message); }
 }
 $('liveGo').onclick = () => saveLive(true);
+// While a stream is up, ticking the box changes its sound straight away.
+$('liveMute').onchange = () => { if (cfg.live && cfg.live.on) saveLive(true); };
 $('liveStop').onclick = () => saveLive(false);
 $('kAdd').onclick = () => { addKuliah(); $('kul').lastChild.querySelector('input').focus(); };
 $('newWeek').onclick = () => {

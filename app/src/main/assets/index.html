@@ -468,7 +468,7 @@ aside{display:flex;flex-direction:column;gap:1.6vh;min-height:0}
 /* ---------- data ---------- */
 const DEF = {
   name: 'Masjid Al-Hidayah', addr: 'Dungun, Terengganu', zone: 'TRG04',
-  azan: 3, iqamah: [10, 5, 5, 5, 5], pre: 5, solat: 12, jumaat: 50, slide: 12,
+  azan: 3, iqamah: [10, 5, 5, 5, 5], pre: 5, solat: 10, jumaat: 50, slide: 12,
   tabung: { week: '1250.50', last: '980.00', total: '', note: 'Kemas kini setiap Jumaat' },
   kuliah: 'Isnin | Selepas Maghrib | Tafsir Al-Quran | Ustaz Ahmad\nRabu | Selepas Maghrib | Fiqh Ibadah | Ustaz Hassan\nJumaat | Selepas Isyak | Kuliah Hadis | Ustaz Ali\nAhad | Selepas Subuh | Tazkirah Pagi | Imam Masjid',
   posterUrls: '',
@@ -1016,32 +1016,33 @@ window.stepSlide = dir => {
 
 /* ---------- live stream from a link ---------- */
 // A YouTube or Facebook link (or a direct .m3u8/.mp4) to what goes on screen; null when not recognised.
-function liveEmbed(link) {
+function liveEmbed(link, mute) {
   let u, m;
   try { u = new URL(String(link).trim()); } catch (e) { return null; }
   const h = u.hostname.replace(/^(www|m)\./, '');
-  const yt = id => (id = id.replace(/[^\w-]/g, '')) ? { frame: `https://www.youtube.com/embed/${id}?autoplay=1&controls=0&rel=0&playsinline=1` } : null;
+  const m1 = mute ? 1 : 0;
+  const yt = id => (id = id.replace(/[^\w-]/g, '')) ? { frame: `https://www.youtube.com/embed/${id}?autoplay=1&mute=${m1}&controls=0&rel=0&playsinline=1` } : null;
   if (h === 'youtu.be') return yt(u.pathname.slice(1));
   if (h === 'youtube.com') {
     if (u.searchParams.get('v')) return yt(u.searchParams.get('v'));
     if ((m = u.pathname.match(/^\/(live|embed|shorts)\/([\w-]+)/))) return yt(m[2]);
     // a channel's own live page keeps working for every new stream
-    if ((m = u.pathname.match(/^\/channel\/(UC[\w-]+)/))) return { frame: `https://www.youtube.com/embed/live_stream?channel=${m[1]}&autoplay=1&controls=0&playsinline=1` };
+    if ((m = u.pathname.match(/^\/channel\/(UC[\w-]+)/))) return { frame: `https://www.youtube.com/embed/live_stream?channel=${m[1]}&autoplay=1&mute=${m1}&controls=0&playsinline=1` };
     return null;
   }
   if (/(^|\.)facebook\.com$/.test(h) || h === 'fb.watch')
-    return { frame: 'https://www.facebook.com/plugins/video.php?href=' + encodeURIComponent(u.href) + '&show_text=false&autoplay=true&mute=0&width=1920&height=1080' };
+    return { frame: 'https://www.facebook.com/plugins/video.php?href=' + encodeURIComponent(u.href) + '&show_text=false&autoplay=true&mute=' + m1 + '&width=1920&height=1080' };
   if (/\.(m3u8|mp4|webm)$/i.test(u.pathname)) return { video: u.href };
   return null;
 }
-let liveUrl = '', livePaused = false;
+let liveUrl = '', liveMute = false, livePaused = false;
 function liveSrc(play) {
   const box = $('liveBox');
   box.textContent = '';
-  const e = play && liveEmbed(liveUrl);
+  const e = play && liveEmbed(liveUrl, liveMute);
   if (!e) return;
   const el = document.createElement(e.video ? 'video' : 'iframe');
-  if (e.video) { el.autoplay = true; el.playsInline = true; }
+  if (e.video) { el.autoplay = true; el.playsInline = true; el.muted = liveMute; }
   else { el.allow = 'autoplay; encrypted-media; picture-in-picture'; el.referrerPolicy = 'strict-origin-when-cross-origin'; }
   el.src = e.video || e.frame;
   box.appendChild(el);
@@ -1053,8 +1054,14 @@ function syncLive() {
   if (want && L.since && Date.now() - L.since > (+cfg.liveMax || 4) * 3600e3) {
     want = ''; cfg.live.on = false; saveCfg();
   }
-  if (want === liveUrl) return;
-  liveUrl = want; livePaused = false;
+  const mute = !!L.mute;
+  if (want === liveUrl && (!want || mute === liveMute)) return;
+  if (want && want === liveUrl) {   // only the sound setting changed: reload the player, unless a prayer screen has it paused
+    liveMute = mute;
+    if (!livePaused) liveSrc(true);
+    return;
+  }
+  liveUrl = want; liveMute = mute; livePaused = false;
   $('live').classList.toggle('on', !!want);
   liveSrc(!!want);
   if (!want) { seq = []; nextSlide(); }

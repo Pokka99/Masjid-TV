@@ -80,7 +80,7 @@ Poster baharu muncul dalam pusingan slide seterusnya. Kali pertama app dibuka, b
 ## Siaran langsung di TV
 - Pautan yang diterima: `youtube.com/watch?v=…`, `youtu.be/…`, `youtube.com/live/…`, `youtube.com/channel/UC…/live` (sentiasa siaran terkini saluran itu), pautan video Facebook, atau terus `.m3u8`/`.mp4`.
 - Siaran mesti **Public**. YouTube lebih stabil daripada Facebook.
-- Live internet lewat 10–30 saat: jika TV dalam masjid yang sama dengan penceramah, matikan bunyi TV supaya tidak bergema.
+- Live internet lewat 10–30 saat: jika TV dalam masjid yang sama dengan penceramah, tandakan **🔇 Tanpa bunyi** di telefon supaya tidak bergema. Pilihan ini boleh ditukar ketika siaran sedang dipapar.
 
 ## Pasang
 ```
