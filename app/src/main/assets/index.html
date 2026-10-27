@@ -117,24 +117,34 @@ aside{display:flex;flex-direction:column;gap:1.6vh;min-height:0}
 .ticker span{display:inline-block;padding-left:100%;animation:tick 40s linear infinite}
 @keyframes tick{to{transform:translateX(-100%)}}
 
-/* Ramadan countdown and the Islamic year's dates */
-.s-islam{flex-direction:row;align-items:stretch;gap:2.5vw;padding:6.5vh 2.5vw 5vh}
-.s-islam .rm{flex:0 0 38%;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;
-  border-radius:2vh;background:linear-gradient(160deg,rgba(227,193,90,.22),rgba(227,193,90,.04));border:1px solid var(--line)}
-.s-islam .rm .k{font-size:2vh;letter-spacing:.3em;color:var(--gold);text-transform:uppercase}
-.s-islam .rm .ar{font-size:5.5vh;color:var(--gold);margin-top:.5vh}
-.s-islam .rm .n{font-size:14vh;font-weight:800;line-height:1;font-variant-numeric:tabular-nums;margin-top:1vh}
-.s-islam .rm .u{font-size:3vh;font-weight:600}
-.s-islam .rm .d{font-size:2.2vh;color:var(--mute);margin-top:1.5vh}
-.s-islam .ev{flex:1;display:flex;flex-direction:column;min-width:0}
-.s-islam .ev h2{font-size:3.6vh;color:var(--gold);margin-bottom:1.2vh}
-.s-islam .row{display:grid;grid-template-columns:minmax(0,1fr) auto 7vw;gap:1.2vw;align-items:center;padding:.9vh 1.2vw;border-radius:1.2vh;background:rgba(0,0,0,.18);margin-bottom:.8vh}
-.s-islam .row b{font-size:2.6vh;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.s-islam .row small{font-size:1.8vh;color:var(--mute)}
-.s-islam .row .g{font-size:2.1vh;color:var(--gold);text-align:right}
-.s-islam .row .c{font-size:2.4vh;font-weight:700;text-align:right;font-variant-numeric:tabular-nums}
-.s-islam .row.soon{background:linear-gradient(90deg,rgba(227,193,90,.25),rgba(227,193,90,.05));border:1px solid var(--gold)}
-.s-islam .note{font-size:1.6vh;color:var(--mute);margin-top:auto}
+/* Ramadan countdown and the Islamic year's dates, full screen */
+#isl{position:fixed;inset:0;z-index:15;opacity:0;visibility:hidden;transition:opacity 1.2s,visibility 0s 1.2s;overflow:hidden;
+  display:flex;flex-direction:column;padding:4vh 3.5vw 3.5vh;background:radial-gradient(circle at 50% 40%,#17704f,#062a20 75%)}
+#isl.on{opacity:1;visibility:visible;transition:opacity 1.2s}
+#isl .bg{position:absolute;inset:0;background-size:cover;background-position:center;opacity:.35}
+#isl .shade{position:absolute;inset:0;background:linear-gradient(180deg,rgba(4,30,22,.75),rgba(4,30,22,.88))}
+#isl>.top,#isl>.body,#isl>.note{position:relative}
+#isl .top{display:flex;align-items:center;justify-content:space-between;min-height:6vh}
+#isl .top .nm{font-size:2.6vh;color:var(--gold);letter-spacing:.12em;text-transform:uppercase}
+#isl .top .pf-chip{position:static}
+#isl .body{flex:1;display:flex;gap:2.5vw;margin-top:2.5vh;min-height:0}
+#isl .rm{flex:0 0 30%;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;border-radius:2.5vh;
+  background:linear-gradient(160deg,rgba(227,193,90,.26),rgba(227,193,90,.05));border:1px solid var(--line)}
+#isl .rm .k{font-size:2.3vh;letter-spacing:.3em;color:var(--gold);text-transform:uppercase}
+#isl .rm .ar{font-size:8vh;color:var(--gold);margin-top:1vh}
+#isl .rm .n{font-size:22vh;font-weight:800;line-height:1;font-variant-numeric:tabular-nums;margin-top:1vh}
+#isl .rm .u{font-size:3.6vh;font-weight:600}
+#isl .rm .d{font-size:2.4vh;color:var(--mute);margin-top:2vh;padding:0 1.5vw}
+#isl .ev{flex:1;display:flex;flex-direction:column;min-width:0}
+#isl .ev h2{font-size:4.6vh;color:var(--gold);margin-bottom:2vh}
+#isl .grid{display:grid;grid-template-columns:1fr 1fr;grid-auto-rows:1fr;gap:1.4vh 1.4vw;flex:1}
+#isl .e{display:flex;flex-direction:column;justify-content:center;padding:1.2vh 1.4vw;border-radius:1.6vh;background:rgba(0,0,0,.28);border:1px solid rgba(227,193,90,.18);min-width:0}
+#isl .e.soon{background:linear-gradient(120deg,rgba(227,193,90,.3),rgba(227,193,90,.08));border-color:var(--gold)}
+#isl .e .t{display:flex;justify-content:space-between;align-items:baseline;gap:1vw}
+#isl .e b{font-size:3vh;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#isl .e .c{font-size:3vh;font-weight:800;color:var(--gold);white-space:nowrap;font-variant-numeric:tabular-nums}
+#isl .e .s{display:flex;justify-content:space-between;gap:1vw;font-size:2.1vh;color:var(--mute);margin-top:.5vh}
+#isl .note{font-size:1.7vh;color:var(--mute);text-align:center;margin-top:1.6vh}
 
 /* announcement slides added from the phone */
 .s-custom{text-align:center;align-items:center}
@@ -307,10 +317,6 @@ aside{display:flex;flex-direction:column;gap:1.6vh;min-height:0}
       </div>
       <div class="slide s-poster" data-k="poster"><div class="pbg" id="pBg"></div><img id="pImg" alt=""></div>
       <div class="slide s-custom" data-k="custom"><div class="tag">Pengumuman</div><h2 id="cT"></h2><div class="cb" id="cB"></div></div>
-      <div class="slide s-islam" data-k="islam">
-        <div class="rm"><div class="k" id="rmK"></div><div class="ar" id="rmA"></div><div class="n" id="rmN"></div><div class="u" id="rmU"></div><div class="d" id="rmD"></div></div>
-        <div class="ev"><h2>Tarikh Penting Islam</h2><div id="evList"></div><div class="note">Tarikh jangkaan; Ramadan dan Syawal tertakluk pada pengumuman rasmi.</div></div>
-      </div>
       <div class="slide s-tabung" data-k="tabung">
         <div class="tag">Tabung Masjid</div>
         <div class="lbl">Kutipan Minggu Ini</div>
@@ -341,6 +347,15 @@ aside{display:flex;flex-direction:column;gap:1.6vh;min-height:0}
   <div class="ticker"><span id="tick"></span></div>
 </div>
 
+<div id="isl">
+  <div class="bg" id="islBg"></div><div class="shade"></div>
+  <div class="top"><div class="nm" id="islNm"></div><div class="pf-chip"><b id="islClock"></b><span id="islNext"></span></div></div>
+  <div class="body">
+    <div class="rm"><div class="k" id="rmK"></div><div class="ar qr" id="rmA"></div><div class="n" id="rmN"></div><div class="u" id="rmU"></div><div class="d" id="rmD"></div></div>
+    <div class="ev"><h2 id="evH">Tarikh Penting Islam</h2><div class="grid" id="evList"></div></div>
+  </div>
+  <div class="note">Tarikh jangkaan berdasarkan kalendar Hijrah; Ramadan, Syawal dan Zulhijjah tertakluk pada pengumuman rasmi.</div>
+</div>
 <div id="live">
   <div id="liveBox"></div>
   <div class="pf-chip live-chip"><i class="dot"></i><span class="lv">LANGSUNG</span><b id="lvClock"></b><span id="lvNext"></span></div>
@@ -720,6 +735,11 @@ function render(force) {
       $('lvNext').textContent = `${s.next.n} ${hm(s.next.t)}`;
     }
   }
+  if ($('isl').classList.contains('on') && s.next) {
+    $('islClock').textContent = hm(t);
+    const m = Math.max(0, Math.ceil((s.next.t - t) / 60e3));
+    $('islNext').innerHTML = `${s.next.n} <b>${hm(s.next.t)}</b> · ${m >= 60 ? Math.floor(m / 60) + ' j ' : ''}${m % 60} min`;
+  }
   if ($('pfull').classList.contains('on') && s.next) {
     $('pfClock').textContent = hm(t);
     const m = Math.max(0, Math.ceil((s.next.t - t) / 60e3));
@@ -885,9 +905,17 @@ function renderIslam(t) {
     $('rmN').textContent = ram.days; $('rmU').textContent = ram.days === 1 ? 'hari lagi (esok)' : 'hari lagi';
     $('rmD').textContent = `Jangkaan 1 Ramadan: ${tarikh(ram.date)}`;
   }
-  $('evList').innerHTML = ev.filter(e => e !== ram || today.m === 9).slice(0, 4).map((e, i) =>
-    `<div class="row${i === 0 ? ' soon' : ''}"><div><b>${e.name}</b><small>${e.h.d} ${HIJ[e.h.m - 1]} ${e.h.y}H</small></div>` +
-    `<div class="g">${tarikh(e.date)}</div><div class="c">${hariLagi(e.days)}</div></div>`).join('');
+  const ys = [...new Set(ev.map(e => e.h.y))];
+  $('evH').textContent = `Tarikh Penting Islam ${ys.join('–')}H`;
+  $('evList').innerHTML = ev.map((e, i) =>
+    `<div class="e${i === 0 ? ' soon' : ''}"><div class="t"><b>${e.name}</b><span class="c">${hariLagi(e.days)}</span></div>` +
+    `<div class="s"><span>${e.h.d} ${HIJ[e.h.m - 1]} ${e.h.y}H</span><span>${tarikh(e.date)}</span></div></div>`).join('');
+}
+// The full-screen dates slide: a dimmed mosque photo behind, masjid name and the clock chip.
+function showIslam(t) {
+  renderIslam(t);
+  $('islNm').textContent = cfg.name;
+  $('islBg').style.backgroundImage = `url("masjid/${PHOTOS[Math.floor(Math.random() * PHOTOS.length)][0]}")`;
 }
 
 /* ---------- slides ---------- */
@@ -947,7 +975,8 @@ function nextSlide() {
     };
     probe.src = src;
   }
-  if (k === 'islam') renderIslam(now());
+  if (k === 'islam') showIslam(now());
+  $('isl').classList.toggle('on', k === 'islam');
   if (k === 'custom') {
     const list = customSlides(), c = list[ci = (ci + 1) % list.length];
     $('cT').textContent = c.t || ''; $('cB').textContent = c.b || '';
@@ -957,7 +986,7 @@ function nextSlide() {
   report(`${SLIDE_NAMES[k] || k} (${si + 1}/${seq.length})`);
   if (k === 'scene') { prepareScene(); renderScene(state(now()), now()); }
   $('scene').classList.toggle('on', k === 'scene');
-  if (k !== 'scene') for (const key in slides) slides[key].classList.toggle('on', key === k);
+  if (k !== 'scene' && k !== 'islam') for (const key in slides) slides[key].classList.toggle('on', key === k);
   [...$('dots').children].forEach((d, i) => d.classList.toggle('on', i === si));
   const ms = (k === 'scene' ? 2 : k === 'ayat' || k === 'poster' ? 1.6 : 1) * Math.max(5, cfg.slide) * 1000;
   slideTimer = setTimeout(nextSlide, ms);
