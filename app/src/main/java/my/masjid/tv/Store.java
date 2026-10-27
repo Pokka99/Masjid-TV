@@ -92,6 +92,31 @@ class Store {
         if (SAFE.matcher(name).matches()) new File(posterDir(), name).delete();
     }
 
+    /** Logo and ustaz photos, kept apart from posters so they never show up as poster slides. */
+    File imageDir() {
+        File d = new File(ctx.getFilesDir(), "images");
+        if (!d.isDirectory()) d.mkdirs();
+        return d;
+    }
+
+    byte[] image(String name) throws IOException {
+        if (!SAFE.matcher(name).matches()) return null;
+        File f = new File(imageDir(), name);
+        return f.isFile() ? read(f) : null;
+    }
+
+    /** Saves under a new unique name and returns it, or null when the name is not allowed. */
+    String addImage(String name, byte[] data) throws IOException {
+        String file = System.currentTimeMillis() + "_" + name.replaceAll("[^A-Za-z0-9._-]", "_");
+        if (!SAFE.matcher(file).matches()) return null;
+        write(new File(imageDir(), file), data);
+        return file;
+    }
+
+    void deleteImage(String name) {
+        if (SAFE.matcher(name).matches()) new File(imageDir(), name).delete();
+    }
+
     private static byte[] read(File f) throws IOException {
         try (InputStream in = new FileInputStream(f)) {
             return readAll(in);

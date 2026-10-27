@@ -59,6 +59,12 @@ class Bridge {
         return slide;
     }
 
+    /** Where the page loads the logo and ustaz photos from. */
+    @JavascriptInterface
+    public String imageBase() {
+        return ORIGIN + "/images/";
+    }
+
     @JavascriptInterface
     public String pin() {
         return store.pin();

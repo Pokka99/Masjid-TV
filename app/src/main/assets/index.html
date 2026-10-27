@@ -27,6 +27,8 @@ body{background:radial-gradient(ellipse at 20% 0%,#145a43 0%,var(--bg2) 35%,var(
 header{display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid var(--line);padding-bottom:1vh}
 .brand{display:flex;align-items:center;gap:1.4vw}
 .dome{width:6.5vh;height:6.5vh;flex:none}
+.logo{height:8vh;max-width:14vw;object-fit:contain;flex:none}
+.mlogo{height:4.5vh;max-width:9vw;object-fit:contain;vertical-align:middle;margin-right:1vw}
 .brand h1{font-size:4.6vh;font-weight:700;letter-spacing:.05em;color:var(--gold);text-transform:uppercase}
 .brand p{font-size:2.3vh;color:var(--mute);margin-top:.3vh}
 .clock{text-align:right}
@@ -57,7 +59,8 @@ main{display:grid;grid-template-columns:1fr 30vw;gap:1.6vw;min-height:0}
 .kr{display:grid;grid-template-columns:16vw 1fr;gap:1.5vw;align-items:center;padding:.9vh 1.5vw;border-radius:1.4vh;background:rgba(0,0,0,.18)}
 .kr.today{background:linear-gradient(90deg,rgba(227,193,90,.25),rgba(227,193,90,.05));border:1px solid var(--gold)}
 .kr .k1{font-size:2.6vh;font-weight:700}.kr .k1 .ms{display:block;font-size:1.9vh;color:var(--mute);font-weight:400}
-.kr .k2{font-size:2.7vh;font-weight:600}.kr .k2 span{display:block;font-size:2vh;color:var(--gold);font-weight:400;margin-top:.2vh}
+.kr .k2{font-size:2.7vh;font-weight:600;display:flex;align-items:center;gap:1vw;min-width:0}
+.kr .av{width:5.4vh;height:5.4vh;border-radius:50%;object-fit:cover;flex:none;border:2px solid var(--gold);background:#0c2e23}.kr .k2 span{display:block;font-size:2vh;color:var(--gold);font-weight:400;margin-top:.2vh}
 .kr .badge{display:inline-block;font-size:1.5vh;font-weight:700;letter-spacing:.05em;background:var(--gold);color:#1a1a1a;padding:.2vh .6vw;border-radius:1vh;margin-left:.6vw;vertical-align:middle}
 
 .s-tabung{text-align:center;align-items:center}
@@ -297,7 +300,8 @@ aside{display:flex;flex-direction:column;gap:1.6vh;min-height:0}
 <div id="app">
   <header>
     <div class="brand">
-      <svg class="dome" viewBox="0 0 64 64" aria-hidden="true"><g fill="none" stroke="#e3c15a" stroke-width="2.5" stroke-linejoin="round">
+      <img class="logo" id="logo" alt="" hidden onerror="this.hidden=true">
+      <svg class="dome" id="dome" viewBox="0 0 64 64" aria-hidden="true"><g fill="none" stroke="#e3c15a" stroke-width="2.5" stroke-linejoin="round">
         <path d="M32 6v6M32 12c-11 0-18 9-18 19h36c0-10-7-19-18-19z"/><path d="M10 31h44v25H10zM27 56V45a5 5 0 0110 0v11"/>
         <path d="M4 56V24l3-5 3 5v32M54 56V24l3-5 3 5v32"/></g><circle cx="32" cy="5" r="2" fill="#e3c15a"/></svg>
       <div><h1 id="mName"></h1><p id="mAddr"></p></div>
@@ -349,7 +353,7 @@ aside{display:flex;flex-direction:column;gap:1.6vh;min-height:0}
 
 <div id="isl">
   <div class="bg" id="islBg"></div><div class="shade"></div>
-  <div class="top"><div class="nm" id="islNm"></div><div class="pf-chip"><b id="islClock"></b><span id="islNext"></span></div></div>
+  <div class="top"><div class="nm"><img class="mlogo" alt="" hidden onerror="this.hidden=true"><span id="islNm"></span></div><div class="pf-chip"><b id="islClock"></b><span id="islNext"></span></div></div>
   <div class="body">
     <div class="rm"><div class="k" id="rmK"></div><div class="ar qr" id="rmA"></div><div class="n" id="rmN"></div><div class="u" id="rmU"></div><div class="d" id="rmD"></div></div>
     <div class="ev"><h2 id="evH">Tarikh Penting Islam</h2><div class="grid" id="evList"></div></div>
@@ -366,7 +370,7 @@ aside{display:flex;flex-direction:column;gap:1.6vh;min-height:0}
 </div>
 <div id="scene">
   <div class="bg" id="scBg"></div><div class="shade"></div>
-  <div class="sc-name" id="scName"></div>
+  <div class="sc-name"><img class="mlogo" alt="" hidden onerror="this.hidden=true"><span id="scName"></span></div>
   <div class="lay">
     <div class="sc-top">
       <div class="sc-clock" id="scClock"></div>
@@ -822,8 +826,18 @@ function hijriOf(t) {
   } catch (e) { return null; }
 }
 
+// URL of an uploaded logo or ustaz photo ('' in a plain browser, which has none).
+function imgUrl(name) {
+  try { return name && A && A.imageBase ? A.imageBase() + encodeURIComponent(name) : ''; } catch (e) { return ''; }
+}
+
 function renderDay(t) {
   $('mName').textContent = cfg.name; $('mAddr').textContent = cfg.addr;
+  // the masjid's own logo, when uploaded, replaces the dome icon
+  const logo = imgUrl(cfg.logo);
+  $('logo').hidden = !logo; $('dome').style.display = logo ? 'none' : '';
+  if (logo && $('logo').getAttribute('src') !== logo) $('logo').src = logo;
+  document.querySelectorAll('.mlogo').forEach(e => { e.hidden = !logo; if (logo) e.src = logo; });
   const g = `${HARI[t.getDay()]}, ${t.getDate()} ${BULAN[t.getMonth()]} ${t.getFullYear()}`;
   const h = hijriOf(t);
   const hs = h ? `${h.d} ${HIJ[h.m - 1]} ${h.y}H` : '';
@@ -843,7 +857,7 @@ function renderDay(t) {
   $('kl').innerHTML = rows.slice(0, 5).map(r => {
     const tod = r[0].toLowerCase() === todayName;
     return `<div class="kr${tod ? ' today' : ''}"><div class="k1">${esc(r[0])}${tod ? '<span class="badge">HARI INI</span>' : ''}<span class="ms">${esc(r[1] || '')}</span></div>` +
-      `<div class="k2">${esc(r[2] || '')}<span>${esc(r[3] || '')}</span></div></div>`;
+      `<div class="k2">${r[4] && imgUrl(r[4]) ? `<img class="av" src="${esc(imgUrl(r[4]))}" alt="" onerror="this.remove()">` : ''}<div>${esc(r[2] || '')}<span>${esc(r[3] || '')}</span></div></div></div>`;
   }).join('') || '<div class="kr"><div class="k2">Tiada kuliah dijadualkan</div></div>';
 
   // tabung

@@ -58,6 +58,9 @@ public class MainActivity extends Activity {
             @Override public byte[] poster(String name) throws IOException { return store.poster(name); }
             @Override public boolean addPoster(String name, byte[] data) throws IOException { return store.addPoster(name, data); }
             @Override public void deletePoster(String name) { store.deletePoster(name); }
+            @Override public byte[] image(String name) throws IOException { return store.image(name); }
+            @Override public String addImage(String name, byte[] data) throws IOException { return store.addImage(name, data); }
+            @Override public void deleteImage(String name) { store.deleteImage(name); }
             @Override public void runJs(String js) { runOnUiThread(() -> web.evaluateJavascript(js, null)); }
             @Override public String currentSlide() { return bridge.currentSlide(); }
         });
@@ -67,6 +70,7 @@ public class MainActivity extends Activity {
         WebViewAssetLoader loader = new WebViewAssetLoader.Builder()
                 .addPathHandler("/assets/", new WebViewAssetLoader.AssetsPathHandler(this))
                 .addPathHandler("/posters/", new WebViewAssetLoader.InternalStoragePathHandler(this, store.posterDir()))
+                .addPathHandler("/images/", new WebViewAssetLoader.InternalStoragePathHandler(this, store.imageDir()))
                 .build();
         web.setWebViewClient(new WebViewClient() {
             @Override

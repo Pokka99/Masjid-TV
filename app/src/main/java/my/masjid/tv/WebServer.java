@@ -31,6 +31,9 @@ class WebServer {
         byte[] poster(String name) throws IOException;   // null when missing
         boolean addPoster(String name, byte[] data) throws IOException;
         void deletePoster(String name);
+        byte[] image(String name) throws IOException;     // logo / ustaz photo, null when missing
+        String addImage(String name, byte[] data) throws IOException;   // stored name, or null
+        void deleteImage(String name);
         void runJs(String js);                   // on the TV page
         String currentSlide();                   // e.g. "kuliah"
     }
@@ -143,6 +146,13 @@ class WebServer {
             else send(out, 200, mime(name), img, "max-age=86400");
             return;
         }
+        if ("GET".equals(method) && path.startsWith("/image/")) {
+            String name = URLDecoder.decode(path.substring(7), "UTF-8");
+            byte[] img = plainName(name) ? b.image(name) : null;
+            if (img == null) send(out, 404, "text/plain", bytes("Tiada"));
+            else send(out, 200, mime(name), img, "max-age=86400");
+            return;
+        }
         if (!path.startsWith("/api/")) {
             send(out, 404, "text/plain", bytes("Tiada"));
             return;
@@ -178,6 +188,20 @@ class WebServer {
                     return;
                 }
                 b.runJs("reloadPosters()");
+                send(out, 200, "application/json", bytes(ok));
+                return;
+            case "POST /api/image": {
+                String imgName = q.getOrDefault("name", "gambar.jpg");
+                String stored = body.length == 0 || !plainName(imgName) ? null : b.addImage(imgName, body);
+                if (stored == null) {
+                    send(out, 400, "text/plain", bytes("Fail tidak sah"));
+                    return;
+                }
+                send(out, 200, "application/json", bytes("{\"name\":\"" + jsonSafe(stored) + "\"}"));
+                return;
+            }
+            case "DELETE /api/image":
+                if (plainName(q.getOrDefault("name", ""))) b.deleteImage(q.get("name"));
                 send(out, 200, "application/json", bytes(ok));
                 return;
             case "DELETE /api/poster":

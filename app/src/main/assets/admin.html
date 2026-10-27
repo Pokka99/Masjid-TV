@@ -56,6 +56,14 @@ textarea{min-height:84px;resize:vertical}
 .btn.red{background:var(--red)}
 .chk{display:flex;align-items:center;gap:10px;margin:14px 0 2px;font-size:15px;color:var(--ink)}
 .chk input{width:22px;height:22px;accent-color:var(--green)}
+.filebtn{display:flex;align-items:center;justify-content:center;cursor:pointer}
+.filebtn input{display:none}
+.btn.small{padding:8px 12px;font-size:14px}
+.logoRow{margin-top:8px;padding:12px;border:1px dashed var(--line);border-radius:12px;display:flex;justify-content:center;min-height:60px;align-items:center;
+  background:repeating-conic-gradient(#ececec 0 25%,#fff 0 50%) 0 0/16px 16px}
+.logoRow img{max-height:90px;max-width:100%}
+.avRow{display:flex;align-items:center;gap:10px;margin-top:10px}
+.avImg{width:56px;height:56px;border-radius:50%;object-fit:cover;border:2px solid var(--gold);flex:none}
 .hide{display:none!important}
 .tab{font-variant-numeric:tabular-nums}
 </style>
@@ -129,6 +137,10 @@ textarea{min-height:84px;resize:vertical}
 
   <div class="card">
     <h2>🕌 Masjid</h2>
+    <label>Logo masjid (PNG berlatar lutsinar paling cantik)</label>
+    <div class="logoRow"><img id="logoImg" class="hide" alt="Logo"><span id="logoNone" class="hint">Tiada logo, ikon kubah dipapar</span></div>
+    <div class="btns2"><label class="btn ghost filebtn">📷 Pilih logo<input type="file" id="logoFile" accept="image/*"></label><button class="btn ghost" id="logoDel">Buang logo</button></div>
+    <div class="hint">Tekan Simpan ke TV selepas memilih.</div>
     <label>Nama masjid</label><input id="name">
     <label>Alamat / lokasi</label><input id="addr">
     <label>Kod zon JAKIM</label><input id="zone" autocapitalize="characters" placeholder="cth: TRG04, WLY01, SGR01">
@@ -210,6 +222,7 @@ function fill() {
   $('cslides').innerHTML = '';
   (cfg.slides || []).forEach(addCustom);
   $('pfullChk').checked = !!cfg.posterFull;
+  showLogo(cfg.logo || '');
   const L = cfg.live || {};
   $('liveUrl').value = L.url || '';
   $('liveNow').classList.toggle('hide', !L.on);
@@ -224,8 +237,10 @@ function collect() {
   for (const id of ['azan', 'pre', 'solat', 'jumaat', 'slide']) c[id] = num(id, cfg[id]);
   c.iqamah = [0, 1, 2, 3, 4].map(i => num('i' + i, (cfg.iqamah || [])[i] || 5));
   c.tabung = { week: $('tw').value.trim(), last: $('tl').value.trim(), total: $('tt').value.trim(), note: $('tn').value.trim() };
-  c.kuliah = [...$('kul').children].map(k => [...k.querySelectorAll('[data-f]')].map(e => e.value.replace(/\|/g, '/').trim()))
+  c.kuliah = [...$('kul').children].map(k => [...k.querySelectorAll('[data-f]')].map(e => e.value.replace(/\|/g, '/').trim())
+      .concat(k.dataset.img ? [k.dataset.img] : []))
     .filter(r => r[2] || r[3]).map(r => r.join(' | ')).join('\n');
+  c.logo = logoName;
   c.slides = [...$('cslides').children].map(k => ({ t: k.querySelector('input').value.trim(), b: k.querySelector('textarea').value.trim() }))
     .filter(x => x.t || x.b);
   c.posterFull = $('pfullChk').checked;
@@ -239,10 +254,28 @@ function addKuliah(r) {
   const days = HARI.map(h => `<option${h.toLowerCase() === (r[0] || '').toLowerCase() ? ' selected' : ''}>${h}</option>`).join('');
   d.innerHTML = `<button class="x" title="Buang">✕</button>
     <div class="row"><div><label>Hari</label><select data-f>${days}</select></div><div><label>Masa</label><input data-f></div></div>
-    <label>Tajuk</label><input data-f><label>Penceramah</label><input data-f>`;
+    <label>Tajuk</label><input data-f><label>Penceramah</label><input data-f>
+    <div class="avRow"><img class="avImg hide" alt=""><label class="btn ghost small filebtn">📷 Gambar ustaz<input type="file" accept="image/*"></label><button class="btn ghost small avDel hide">Buang</button></div>`;
   const f = d.querySelectorAll('input[data-f]');
   f[0].value = r[1] || ''; f[1].value = r[2] || ''; f[2].value = r[3] || '';
-  d.querySelector('.x').onclick = () => d.remove();
+  const av = d.querySelector('.avImg'), del = d.querySelector('.avDel');
+  const setImg = n => {
+    if (d.dataset.img && d.dataset.img !== n) dropImage(d.dataset.img);
+    d.dataset.img = n || '';
+    av.classList.toggle('hide', !n); del.classList.toggle('hide', !n);
+    if (n) av.src = '/image/' + encodeURIComponent(n);
+  };
+  d.dataset.img = '';
+  setImg(r[4] || '');
+  d.querySelector('input[type=file]').onchange = async e => {
+    const file = e.target.files[0]; e.target.value = '';
+    if (!file) return;
+    toast('Menghantar gambar…');
+    try { setImg(await uploadImage(file, 500, 'image/jpeg', true, 'ustaz')); toast('Gambar sedia. Tekan Simpan ke TV.'); }
+    catch (err) { if (err.message !== 'pin') toast('Gagal: ' + err.message); }
+  };
+  del.onclick = () => setImg('');
+  d.querySelector('.x').onclick = () => { setImg(''); d.remove(); };
   $('kul').appendChild(d);
 }
 
@@ -273,21 +306,47 @@ function showPosters(names) {
   }
 }
 // Phone photos are several MB; the TV only needs about 1920 px.
-function shrink(file) {
+// square: crop to a square (faces sit high in a portrait, so keep the upper part)
+function shrink(file, max = 1920, type = 'image/jpeg', square = false) {
   return new Promise((ok, bad) => {
     const img = new Image(), url = URL.createObjectURL(file);
     img.onload = () => {
-      const k = Math.min(1, 1920 / Math.max(img.width, img.height));
+      let sx = 0, sy = 0, sw = img.width, sh = img.height;
+      if (square) { const m = Math.min(sw, sh); sx = (sw - m) / 2; sy = (sh - m) / 4; sw = sh = m; }
+      const k = Math.min(1, max / Math.max(sw, sh));
       const c = document.createElement('canvas');
-      c.width = Math.round(img.width * k); c.height = Math.round(img.height * k);
-      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+      c.width = Math.round(sw * k); c.height = Math.round(sh * k);
+      c.getContext('2d').drawImage(img, sx, sy, sw, sh, 0, 0, c.width, c.height);
       URL.revokeObjectURL(url);
-      c.toBlob(b => b ? ok(b) : bad(new Error('gagal')), 'image/jpeg', .85);
+      c.toBlob(b => b ? ok(b) : bad(new Error('gagal')), type, .85);
     };
     img.onerror = () => { URL.revokeObjectURL(url); bad(new Error('bukan gambar')); };
     img.src = url;
   });
 }
+/* ---------- logo and ustaz photos ---------- */
+async function uploadImage(file, max, type, square, base) {
+  const blob = await shrink(file, max, type, square);
+  const r = await api('POST', '/api/image?name=' + encodeURIComponent(base + (type === 'image/png' ? '.png' : '.jpg')), blob, type);
+  return r.name;
+}
+// Replaced or removed images are deleted from the TV once the change is saved.
+let pendingDrop = [], logoName = '';
+const dropImage = n => { if (n) pendingDrop.push(n); };
+function showLogo(n) {
+  logoName = n;
+  $('logoImg').classList.toggle('hide', !n); $('logoNone').classList.toggle('hide', !!n);
+  if (n) $('logoImg').src = '/image/' + encodeURIComponent(n);
+}
+$('logoFile').onchange = async e => {
+  const file = e.target.files[0]; e.target.value = '';
+  if (!file) return;
+  toast('Menghantar logo…');
+  try { dropImage(logoName); showLogo(await uploadImage(file, 800, 'image/png', false, 'logo')); toast('Logo sedia. Tekan Simpan ke TV.'); }
+  catch (err) { if (err.message !== 'pin') toast('Gagal: ' + err.message); }
+};
+$('logoDel').onclick = () => { dropImage(logoName); showLogo(''); toast('Tekan Simpan ke TV untuk buang logo'); };
+
 $('pFile').onchange = async e => {
   const files = [...e.target.files];
   e.target.value = '';
@@ -332,7 +391,13 @@ $('newWeek').onclick = () => {
 };
 $('save').onclick = async () => {
   $('save').disabled = true;
-  try { cfg = collect(); await api('POST', '/api/config', JSON.stringify(cfg), 'application/json'); $('hName').textContent = cfg.name; toast('Disimpan ✓ TV sudah dikemas kini'); }
+  try {
+    cfg = collect();
+    await api('POST', '/api/config', JSON.stringify(cfg), 'application/json');
+    $('hName').textContent = cfg.name; toast('Disimpan ✓ TV sudah dikemas kini');
+    const used = JSON.stringify(cfg);
+    for (const n of pendingDrop.splice(0)) if (!used.includes(n)) api('DELETE', '/api/image?name=' + encodeURIComponent(n)).catch(() => {});
+  }
   catch (e) { if (e.message !== 'pin') toast('Gagal simpan: ' + e.message); }
   $('save').disabled = false;
 };
