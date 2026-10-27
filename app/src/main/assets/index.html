@@ -528,9 +528,10 @@ const store = {
 };
 // On the TV the settings live in the app (so the phone page can edit them); in a browser, in localStorage.
 const A = window.Android || null;
+let appHasCfg = false;   // the app already holds settings (anything but a first run)
 function loadCfg() {
   let c = null;
-  try { const j = A && A.config(); if (j) c = JSON.parse(j); } catch (e) {}
+  try { const j = A && A.config(); if (j) { c = JSON.parse(j); appHasCfg = true; } } catch (e) {}
   c = c || store.get('cfg', {});
   const out = Object.assign({}, DEF, c);
   out.tabung = Object.assign({}, DEF.tabung, c.tabung);
@@ -542,7 +543,9 @@ function saveCfg() {
   try { A && A.saveConfig(JSON.stringify(cfg)); } catch (e) {}
 }
 let cfg = loadCfg();
-saveCfg();   // first run: give the phone page the full defaults to edit
+// First run only: give the phone page the full defaults to edit. Never at a later start, where a failed
+// read would otherwise put this browser's older copy over the settings the phone saved.
+if (A && !appHasCfg) saveCfg();
 // Called by the app after the phone page saves or changes posters.
 window.applyConfig = () => {
   const zone = cfg.zone;

@@ -31,7 +31,7 @@ Skrin paparan masjid untuk TV Android, satu fail `app/src/main/assets/index.html
 | ![Skrin penuh: kiraan 104 hari menanti Ramadan dan sepuluh tarikh penting Islam akan datang](docs/screenshots/14-tarikh-islam.jpg) | |
 | *Countdown Ramadan & tarikh penting Islam* | |
 
-<p align="center"><img src="docs/screenshots/13-telefon.jpg" width="300" alt="Halaman kawalan di telefon: tabung, poster, jadual kuliah"><br><em>Kawalan dari telefon</em></p>
+<p align="center"><img src="docs/screenshots/13-telefon.jpg" width="300" alt="Halaman kawalan di telefon seperti app, dengan tab Utama, Slide, Kuliah, Tabung dan Tetapan di bawah"><br><em>Kawalan dari telefon: tab di bawah seperti app</em></p>
 
 ## Fungsi
 - **Waktu solat JAKIM** (e-Solat, ikut kod zon) — dimuat turun setahun sekali, simpan dalam TV, tetap jalan jika internet putus.
