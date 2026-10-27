@@ -99,7 +99,7 @@ aside{display:flex;flex-direction:column;gap:1.6vh;min-height:0}
 .iqinfo .g div{font-size:1.8vh}.iqinfo b{display:block;color:var(--gold);font-size:3.4vh}
 
 /* prayer row */
-.times{display:grid;grid-template-columns:repeat(7,1fr);gap:1vw}
+.times{display:grid;grid-template-columns:repeat(7,1fr);gap:1vw;margin-top:1.2vh}
 .pt{background:var(--card);border:1px solid var(--line);border-radius:1.8vh;display:flex;flex-direction:column;
   align-items:center;justify-content:center;position:relative;transition:.5s}
 .pt .pn{font-size:2.8vh;font-weight:600;letter-spacing:.05em}
@@ -116,6 +116,25 @@ aside{display:flex;flex-direction:column;gap:1.6vh;min-height:0}
 .ticker{overflow:hidden;white-space:nowrap;font-size:2.5vh;color:var(--gold);display:flex;align-items:center;border-top:1px solid var(--line)}
 .ticker span{display:inline-block;padding-left:100%;animation:tick 40s linear infinite}
 @keyframes tick{to{transform:translateX(-100%)}}
+
+/* Ramadan countdown and the Islamic year's dates */
+.s-islam{flex-direction:row;align-items:stretch;gap:2.5vw;padding:6.5vh 2.5vw 5vh}
+.s-islam .rm{flex:0 0 38%;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;
+  border-radius:2vh;background:linear-gradient(160deg,rgba(227,193,90,.22),rgba(227,193,90,.04));border:1px solid var(--line)}
+.s-islam .rm .k{font-size:2vh;letter-spacing:.3em;color:var(--gold);text-transform:uppercase}
+.s-islam .rm .ar{font-size:5.5vh;color:var(--gold);margin-top:.5vh}
+.s-islam .rm .n{font-size:14vh;font-weight:800;line-height:1;font-variant-numeric:tabular-nums;margin-top:1vh}
+.s-islam .rm .u{font-size:3vh;font-weight:600}
+.s-islam .rm .d{font-size:2.2vh;color:var(--mute);margin-top:1.5vh}
+.s-islam .ev{flex:1;display:flex;flex-direction:column;min-width:0}
+.s-islam .ev h2{font-size:3.6vh;color:var(--gold);margin-bottom:1.2vh}
+.s-islam .row{display:grid;grid-template-columns:minmax(0,1fr) auto 7vw;gap:1.2vw;align-items:center;padding:.9vh 1.2vw;border-radius:1.2vh;background:rgba(0,0,0,.18);margin-bottom:.8vh}
+.s-islam .row b{font-size:2.6vh;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.s-islam .row small{font-size:1.8vh;color:var(--mute)}
+.s-islam .row .g{font-size:2.1vh;color:var(--gold);text-align:right}
+.s-islam .row .c{font-size:2.4vh;font-weight:700;text-align:right;font-variant-numeric:tabular-nums}
+.s-islam .row.soon{background:linear-gradient(90deg,rgba(227,193,90,.25),rgba(227,193,90,.05));border:1px solid var(--gold)}
+.s-islam .note{font-size:1.6vh;color:var(--mute);margin-top:auto}
 
 /* announcement slides added from the phone */
 .s-custom{text-align:center;align-items:center}
@@ -288,6 +307,10 @@ aside{display:flex;flex-direction:column;gap:1.6vh;min-height:0}
       </div>
       <div class="slide s-poster" data-k="poster"><div class="pbg" id="pBg"></div><img id="pImg" alt=""></div>
       <div class="slide s-custom" data-k="custom"><div class="tag">Pengumuman</div><h2 id="cT"></h2><div class="cb" id="cB"></div></div>
+      <div class="slide s-islam" data-k="islam">
+        <div class="rm"><div class="k" id="rmK"></div><div class="ar" id="rmA"></div><div class="n" id="rmN"></div><div class="u" id="rmU"></div><div class="d" id="rmD"></div></div>
+        <div class="ev"><h2>Tarikh Penting Islam</h2><div id="evList"></div><div class="note">Tarikh jangkaan; Ramadan dan Syawal tertakluk pada pengumuman rasmi.</div></div>
+      </div>
       <div class="slide s-tabung" data-k="tabung">
         <div class="tag">Tabung Masjid</div>
         <div class="lbl">Kutipan Minggu Ini</div>
@@ -820,12 +843,59 @@ function renderDay(t) {
 }
 const esc = s => s.replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
+/* ---------- Ramadan countdown and Islamic dates ---------- */
+// [Hijri month, day, name]
+const EVENTS = [[1, 1, 'Awal Muharram'], [1, 10, 'Hari Asyura'], [3, 12, 'Maulidur Rasul'], [7, 27, 'Israk & Mikraj'],
+  [8, 15, 'Nisfu Syaaban'], [9, 1, 'Awal Ramadan'], [9, 17, 'Nuzul Al-Quran'], [10, 1, 'Hari Raya Aidilfitri'],
+  [12, 9, 'Hari Arafah'], [12, 10, 'Hari Raya Aidiladha']];
+const UQ = (() => { try { return new Intl.DateTimeFormat('en-u-ca-islamic-umalqura', { day: 'numeric', month: 'numeric', year: 'numeric' }); } catch (e) { return null; } })();
+const uq = d => { const f = UQ.formatToParts(d), g = k => parseInt(f.find(x => x.type === k).value); return { y: g('year'), m: g('month'), d: g('day') }; };
+const addDays = (t, n) => new Date(t.getFullYear(), t.getMonth(), t.getDate() + n, 12);
+// Days to shift the Umm al-Qura calendar so it agrees with JAKIM's Hijri date for today.
+function hijriShift(t) {
+  const p = dayData(t);
+  if (!p || !p.hijri) return 0;
+  const [y, m, d] = p.hijri.split('-').map(Number);
+  for (const k of [0, -1, 1, -2, 2]) { const h = uq(addDays(t, k)); if (h.y === y && h.m === m && h.d === d) return k; }
+  return 0;
+}
+// Next date of each event within about 13 months: [{name, date, days, h}], soonest first.
+function upcoming(t) {
+  const k = hijriShift(t), out = [], seen = new Set();
+  for (let n = 0; n < 400 && out.length < EVENTS.length; n++) {
+    const date = addDays(t, n), h = uq(addDays(date, k));
+    for (const [m, d, name] of EVENTS) if (m === h.m && d === h.d && !seen.has(name)) { seen.add(name); out.push({ name, date, days: n, h }); }
+  }
+  return out;
+}
+const hariLagi = n => n === 0 ? 'Hari ini' : n === 1 ? 'Esok' : n + ' hari';
+const tarikh = d => `${HARI[d.getDay()].slice(0, 3)}, ${d.getDate()} ${BULAN[d.getMonth()].slice(0, 3)} ${d.getFullYear()}`;
+let islamDay = '';
+function renderIslam(t) {
+  if (!UQ || islamDay === dkey(t) + cfg.zone) return;
+  islamDay = dkey(t) + cfg.zone;
+  const ev = upcoming(t), today = uq(addDays(t, hijriShift(t)));
+  const fitri = ev.find(e => e.name === 'Hari Raya Aidilfitri'), ram = ev.find(e => e.name === 'Awal Ramadan');
+  if (today.m === 9 && fitri) {           // during Ramadan: which day it is, and how long to Syawal
+    $('rmK').textContent = `Ramadan ${today.y}H`; $('rmA').textContent = 'رَمَضَانُ كَرِيمٌ';
+    $('rmN').textContent = today.d; $('rmU').textContent = 'hari Ramadan';
+    $('rmD').textContent = `Aidilfitri dijangka ${tarikh(fitri.date)} · ${hariLagi(fitri.days)} lagi`;
+  } else if (ram) {
+    $('rmK').textContent = `Menanti Ramadan ${ram.h.y}H`; $('rmA').textContent = 'رَمَضَانُ';
+    $('rmN').textContent = ram.days; $('rmU').textContent = ram.days === 1 ? 'hari lagi (esok)' : 'hari lagi';
+    $('rmD').textContent = `Jangkaan 1 Ramadan: ${tarikh(ram.date)}`;
+  }
+  $('evList').innerHTML = ev.filter(e => e !== ram || today.m === 9).slice(0, 4).map((e, i) =>
+    `<div class="row${i === 0 ? ' soon' : ''}"><div><b>${e.name}</b><small>${e.h.d} ${HIJ[e.h.m - 1]} ${e.h.y}H</small></div>` +
+    `<div class="g">${tarikh(e.date)}</div><div class="c">${hariLagi(e.days)}</div></div>`).join('');
+}
+
 /* ---------- slides ---------- */
 const slides = {};
 document.querySelectorAll('.slide').forEach(el => slides[el.dataset.k] = el);
 // One cycle; each 'poster' slot shows the next poster, and is dropped when there are none.
-const CYCLE = ['scene', 'date', 'kuliah', 'poster', 'custom', 'tabung', 'scene', 'ayat', 'poster', 'custom'];
-const SLIDE_NAMES = { scene: 'Gambar masjid', date: 'Tarikh Hijrah', kuliah: 'Jadual kuliah', poster: 'Poster', custom: 'Pengumuman', tabung: 'Tabung masjid', ayat: 'Ayat Al-Quran' };
+const CYCLE = ['scene', 'date', 'kuliah', 'poster', 'islam', 'custom', 'tabung', 'scene', 'ayat', 'poster', 'custom'];
+const SLIDE_NAMES = { scene: 'Gambar masjid', date: 'Tarikh Hijrah', kuliah: 'Jadual kuliah', poster: 'Poster', custom: 'Pengumuman', islam: 'Ramadan & tarikh Islam', tabung: 'Tabung masjid', ayat: 'Ayat Al-Quran' };
 let seq = [], si = -1, ai = Math.floor(Math.random() * AYAT.length), pi = -1, ci = -1, posters = [], slideTimer;
 const customSlides = () => (cfg.slides || []).filter(c => c && (c.t || c.b));
 
@@ -848,7 +918,7 @@ function nextSlide() {
     loadPosters();
     // ?slide=kuliah holds one slide, for previews and screenshots
     const only = q.get('slide');
-    const have = k => (k !== 'poster' || posters.length) && (k !== 'custom' || customSlides().length);
+    const have = k => (k !== 'poster' || posters.length) && (k !== 'custom' || customSlides().length) && (k !== 'islam' || UQ);
     seq = (only && CYCLE.includes(only) ? [only] : CYCLE).filter(have);
     if (!seq.length) seq = CYCLE.filter(k => k !== 'poster' && k !== 'custom');
     $('dots').innerHTML = seq.map(() => '<i></i>').join('');
@@ -866,16 +936,18 @@ function nextSlide() {
     $('pImg').onerror = () => { clearTimeout(slideTimer); slideTimer = setTimeout(nextSlide, 300); };
     $('pImg').src = src;
     $('pBg').style.backgroundImage = `url("${src.replace(/"/g, '%22')}")`;
-    // A landscape poster would be small in the box, so it takes the whole screen instead.
+    // A landscape poster would be small in the box, so it takes the whole screen instead
+    // (every poster does when "Papar semua poster skrin penuh" is on).
     const probe = new Image();
     probe.onload = () => {
-      if (seq[si] !== 'poster' || probe.naturalWidth / probe.naturalHeight < 1.2) return;
+      if (seq[si] !== 'poster' || (!cfg.posterFull && probe.naturalWidth / probe.naturalHeight < 1.2)) return;
       $('pfImg').src = src; $('pfBg').style.backgroundImage = $('pBg').style.backgroundImage;
       $('pfull').classList.add('on');
       render();
     };
     probe.src = src;
   }
+  if (k === 'islam') renderIslam(now());
   if (k === 'custom') {
     const list = customSlides(), c = list[ci = (ci + 1) % list.length];
     $('cT').textContent = c.t || ''; $('cB').textContent = c.b || '';

@@ -54,6 +54,8 @@ textarea{min-height:84px;resize:vertical}
 .now{margin-top:10px;padding:10px 12px;border-radius:10px;background:#eef5f1;color:var(--green);font-weight:600;font-size:14px;text-align:center}
 .now.live{background:#fdecea;color:var(--red)}
 .btn.red{background:var(--red)}
+.chk{display:flex;align-items:center;gap:10px;margin:14px 0 2px;font-size:15px;color:var(--ink)}
+.chk input{width:22px;height:22px;accent-color:var(--green)}
 .hide{display:none!important}
 .tab{font-variant-numeric:tabular-nums}
 </style>
@@ -100,9 +102,10 @@ textarea{min-height:84px;resize:vertical}
   <div class="card">
     <h2>🖼️ Poster Kuliah</h2>
     <label class="drop">＋ Pilih poster dari galeri<input type="file" id="pFile" accept="image/*" multiple></label>
-    <div class="hint">Saiz terbaik: <b>potret 1080×1350</b> (4:5, dipapar dalam kotak) atau <b>landskap 1920×1080</b> (16:9, dipapar skrin penuh). Di Canva: "Instagram Post (4:5)" atau "Presentation (16:9)".</div>
+    <div class="hint">Saiz terbaik: <b>potret 1080×1350</b> (4:5, dalam kotak, atau skrin penuh jika pilihan di bawah dihidupkan) atau <b>landskap 1920×1080</b> (16:9, sentiasa skrin penuh). Di Canva: "Instagram Post (4:5)" atau "Presentation (16:9)".</div>
     <div class="hint" id="pMsg">Gambar dikecilkan secara automatik sebelum dihantar.</div>
     <div class="posters" id="posters"></div>
+    <label class="chk"><input type="checkbox" id="pfullChk"> Papar <b>semua</b> poster skrin penuh (termasuk potret)</label>
     <label>Pautan poster dari internet (pilihan, satu URL setiap baris)</label><textarea id="purls" placeholder="https://..."></textarea>
   </div>
 
@@ -206,6 +209,7 @@ function fill() {
   (cfg.kuliah || '').split('\n').map(l => l.split('|').map(x => x.trim())).filter(r => r[0]).forEach(addKuliah);
   $('cslides').innerHTML = '';
   (cfg.slides || []).forEach(addCustom);
+  $('pfullChk').checked = !!cfg.posterFull;
   const L = cfg.live || {};
   $('liveUrl').value = L.url || '';
   $('liveNow').classList.toggle('hide', !L.on);
@@ -224,6 +228,7 @@ function collect() {
     .filter(r => r[2] || r[3]).map(r => r.join(' | ')).join('\n');
   c.slides = [...$('cslides').children].map(k => ({ t: k.querySelector('input').value.trim(), b: k.querySelector('textarea').value.trim() }))
     .filter(x => x.t || x.b);
+  c.posterFull = $('pfullChk').checked;
   return c;
 }
 

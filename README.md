@@ -43,6 +43,7 @@ Skrin paparan masjid untuk TV Android, satu fail `app/src/main/assets/index.html
 - **Slide automatik**: Tarikh Hijrah (Rumi + Jawi), Jadual Kuliah (hari ini ditanda), Kutipan Tabung mingguan (+ perbandingan minggu lepas), Ayat Al-Quran (10 ayat, teks Arab + terjemahan Kemenag RI).
 - **Poster kuliah**: gambar dalam folder bernama `Poster` dipapar sebagai slide (2 kali setiap pusingan, bergilir).
 - **Slide pengumuman** sendiri (tajuk + teks), ditambah dari telefon.
+- **Countdown Ramadan & tarikh penting Islam**: berapa hari lagi ke Ramadan (semasa Ramadan: hari ke berapa dan kiraan ke Aidilfitri), serta tarikh akan datang bagi Awal Muharram, Asyura, Maulidur Rasul, Israk & Mikraj, Nisfu Syaaban, Nuzul Al-Quran, Aidilfitri, Arafah dan Aidiladha. Dikira daripada kalendar Hijrah dan diselaraskan dengan tarikh Hijrah JAKIM; Ramadan dan Syawal tertakluk pada pengumuman rasmi.
 - **Siaran langsung di TV**: tampal pautan YouTube Live atau Facebook Live di telefon → TV papar skrin penuh. Berhenti sendiri ketika azan, iqamah dan solat, kemudian sambung semula; tamat sendiri selepas 4 jam.
 - Teks bergerak untuk pengumuman. Hidup sendiri bila TV dibuka; skrin tidak tidur.
 
@@ -61,7 +62,7 @@ Saiz poster terbaik:
 
 | Bentuk | Saiz | Cara dipapar | Di Canva |
 |---|---|---|---|
-| Potret | **1080 × 1350** (4:5) | Dalam kotak slide, waktu solat kekal kelihatan | "Instagram Post (4:5)" |
+| Potret | **1080 × 1350** (4:5) | Dalam kotak slide, waktu solat kekal kelihatan — atau skrin penuh jika "Papar semua poster skrin penuh" dihidupkan di telefon | "Instagram Post (4:5)" |
 | Landskap | **1920 × 1080** (16:9) | **Skrin penuh**, dengan cip jam dan solat seterusnya di penjuru | "Presentation (16:9)" |
 
 Saiz lain juga boleh — poster dimuatkan tanpa dipotong, dan ruang kosong diisi latar kabur daripada poster itu sendiri.
