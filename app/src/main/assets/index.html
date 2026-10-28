@@ -661,7 +661,8 @@ function fmtCd(ms) {
   const h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60), x = s % 60;
   return h ? `${h}:${pad(m)}:${pad(x)}` : `${pad(m)}:${pad(x)}`;
 }
-const hm = d => `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+// Every clock and prayer time on screen, in the format chosen on the phone (24-hour unless cfg.clock12).
+const hm = d => cfg.clock12 ? `${d.getHours() % 12 || 12}:${pad(d.getMinutes())}` : `${pad(d.getHours())}:${pad(d.getMinutes())}`;
 const rm = v => { const n = parseFloat(String(v).replace(/[^\d.]/g, '')); return isNaN(n) ? null : n; };
 const money = n => n.toLocaleString('en-MY', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
@@ -785,13 +786,12 @@ function render(force) {
   $('iqinfo').innerHTML = `Minit iqamah selepas azan<div class="g">${iq}</div>`;
 }
 
-const h12 = d => `${d.getHours() % 12 || 12}:${pad(d.getMinutes())}`;
 function renderScene(s, t) {
-  $('scClock').textContent = h12(t);
+  $('scClock').textContent = hm(t);
   if (!s.today) return;
   const nx = s.next ? s.next.k : '';
   const html = s.today.filter(p => p.iq >= 0 || p.jum).map(p =>
-    `<div class="t${p.k === nx ? ' nx' : ''}"><div class="n">${p.n}</div><div class="v">${h12(p.t)}</div></div>`).join('');
+    `<div class="t${p.k === nx ? ' nx' : ''}"><div class="n">${p.n}</div><div class="v">${hm(p.t)}</div></div>`).join('');
   if ($('scTimes').innerHTML !== html) $('scTimes').innerHTML = html;
   if (s.next) {
     const m = Math.max(0, Math.ceil((s.next.t - t) / 60e3)), h = Math.floor(m / 60);

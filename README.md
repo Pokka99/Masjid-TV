@@ -32,6 +32,7 @@ Skrin paparan masjid untuk TV Android, satu fail `app/src/main/assets/index.html
 ## Fungsi
 - **Slide intro masjid** (skrin penuh): logo, "Selamat datang ke" nama masjid dan alamat, di atas gambar masjid anda sendiri (muat naik dari telefon: Tetapan → Masjid).
 - **Waktu solat JAKIM** (e-Solat, ikut kod zon) — dimuat turun setahun sekali, simpan dalam TV, tetap jalan jika internet putus.
+- **Format jam 24 jam atau 12 jam** (pilih di telefon: Tetapan → Format jam), sama di semua skrin.
 - **Kiraan detik solat seterusnya**; kotak bertukar emas & berdenyut bila tinggal ≤ 5 minit sebelum masuk waktu.
 - **Animasi waktu solat** (skrin penuh):
   1. 60 saat terakhir sebelum masuk waktu — cincin kiraan detik.
