@@ -173,6 +173,27 @@ aside{display:flex;flex-direction:column;gap:1.6vh;min-height:0}
 .pf-chip b{font-size:3.4vh;color:var(--text);font-variant-numeric:tabular-nums}
 .pf-chip span b{font-size:2.6vh;color:var(--gold)}
 
+/* intro: the masjid's own photo, logo and name, full screen */
+#intro{position:fixed;inset:0;z-index:15;opacity:0;visibility:hidden;transition:opacity 1.2s,visibility 0s 1.2s;overflow:hidden;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;background:radial-gradient(circle at 50% 40%,#17704f,#062a20 75%)}
+#intro.on{opacity:1;visibility:visible;transition:opacity 1.2s}
+#intro .bg{position:absolute;inset:0;background-size:cover;background-position:center}
+#intro.on .bg{animation:kb 45s ease-out both}
+#intro .shade{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 48%,rgba(0,0,0,.35),rgba(0,0,0,.72) 80%)}
+#intro .lay{position:relative;display:flex;flex-direction:column;align-items:center;padding:0 6vw}
+#intro .lg{height:26vh;max-width:40vw;object-fit:contain;filter:drop-shadow(0 1vh 3vh rgba(0,0,0,.6))}
+#intro .dome{width:22vh;height:22vh;filter:drop-shadow(0 1vh 3vh rgba(0,0,0,.6))}
+#intro .wc{font-size:2.8vh;letter-spacing:.45em;color:#e9e3cf;text-transform:uppercase;margin-top:4vh;text-shadow:0 .2vh 1vh rgba(0,0,0,.8)}
+#intro .nm{font-family:Georgia,"Noto Serif",serif;font-size:11vh;font-weight:700;line-height:1.1;margin-top:1.5vh;
+  background:linear-gradient(180deg,#fff3c4,#e3c15a 55%,#b8902a);-webkit-background-clip:text;background-clip:text;color:transparent;
+  filter:drop-shadow(0 .4vh 1.2vh rgba(0,0,0,.7))}
+#intro .ad{font-size:3.4vh;color:#fff;margin-top:1.5vh;text-shadow:0 .2vh 1vh rgba(0,0,0,.8)}
+#intro .div{width:30vw;height:1px;background:linear-gradient(90deg,transparent,rgba(227,193,90,.85),transparent);margin-top:4vh}
+#intro.on .lg,#intro.on .dome{animation:zoom 1.6s .2s cubic-bezier(.2,.8,.2,1) both}
+#intro.on .wc{animation:rise 1.2s .8s cubic-bezier(.2,.8,.2,1) both}
+#intro.on .nm{animation:rise 1.2s 1.1s cubic-bezier(.2,.8,.2,1) both}
+#intro.on .ad,#intro.on .div{animation:rise 1.2s 1.5s cubic-bezier(.2,.8,.2,1) both}
+
 /* full-screen photo slide */
 #scene{position:fixed;inset:0;z-index:15;opacity:0;visibility:hidden;transition:opacity 1.2s,visibility 0s 1.2s;overflow:hidden;
   display:flex;flex-direction:column;align-items:center;justify-content:center;padding-bottom:9vh;font-family:Georgia,"Noto Serif",serif;background:radial-gradient(circle at 50% 40%,#17704f,#062a20 75%)}
@@ -360,6 +381,20 @@ aside{display:flex;flex-direction:column;gap:1.6vh;min-height:0}
 <div id="pfull">
   <div class="pbg" id="pfBg"></div><img id="pfImg" alt="">
   <div class="pf-chip"><b id="pfClock"></b><span id="pfNext"></span></div>
+</div>
+<div id="intro">
+  <div class="bg" id="inBg"></div><div class="shade"></div>
+  <div class="pf-chip"><b id="inClock"></b><span id="inNext"></span></div>
+  <div class="lay">
+    <img class="lg" id="inLogo" alt="" hidden onerror="this.hidden=true">
+    <svg class="dome" id="inDome" viewBox="0 0 64 64" aria-hidden="true"><g fill="none" stroke="#e3c15a" stroke-width="2.5" stroke-linejoin="round">
+      <path d="M32 6v6M32 12c-11 0-18 9-18 19h36c0-10-7-19-18-19z"/><path d="M10 31h44v25H10zM27 56V45a5 5 0 0110 0v11"/>
+      <path d="M4 56V24l3-5 3 5v32M54 56V24l3-5 3 5v32"/></g><circle cx="32" cy="5" r="2" fill="#e3c15a"/></svg>
+    <div class="wc">Selamat datang ke</div>
+    <div class="nm" id="inName"></div>
+    <div class="ad" id="inAddr"></div>
+    <div class="div"></div>
+  </div>
 </div>
 <div id="scene">
   <div class="bg" id="scBg"></div><div class="shade"></div>
@@ -722,6 +757,10 @@ function render(force) {
       $('lvNext').textContent = `${s.next.n} ${hm(s.next.t)}`;
     }
   }
+  if ($('intro').classList.contains('on') && s.next) {
+    $('inClock').textContent = hm(t);
+    $('inNext').innerHTML = `${s.next.n} <b>${hm(s.next.t)}</b>`;
+  }
   if ($('isl').classList.contains('on') && s.next) {
     $('islClock').textContent = hm(t);
     const m = Math.max(0, Math.ceil((s.next.t - t) / 60e3));
@@ -915,12 +954,23 @@ function showIslam(t) {
   $('islBg').style.backgroundImage = `url("masjid/${PHOTOS[Math.floor(Math.random() * PHOTOS.length)][0]}")`;
 }
 
+// The intro slide: the masjid's own background photo (a stock mosque photo until one is uploaded), logo and name.
+function showIntro() {
+  const logo = imgUrl(cfg.logo);
+  $('inLogo').hidden = !logo; $('inDome').style.display = logo ? 'none' : '';
+  if (logo) $('inLogo').src = logo;
+  $('inName').textContent = cfg.name; $('inAddr').textContent = cfg.addr;
+  const bg = imgUrl(cfg.introBg) || `masjid/${PHOTOS[Math.floor(Math.random() * PHOTOS.length)][0]}`;
+  $('inBg').style.backgroundImage = `url("${bg}")`;
+  $('inBg').style.animation = 'none'; void $('inBg').offsetWidth; $('inBg').style.animation = '';   // restart the slow zoom
+}
+
 /* ---------- slides ---------- */
 const slides = {};
 document.querySelectorAll('.slide').forEach(el => slides[el.dataset.k] = el);
 // One cycle; each 'poster' slot shows the next poster, and is dropped when there are none.
-const CYCLE = ['scene', 'date', 'kuliah', 'poster', 'islam', 'custom', 'tabung', 'scene', 'ayat', 'poster', 'custom'];
-const SLIDE_NAMES = { scene: 'Gambar masjid', date: 'Tarikh Hijrah', kuliah: 'Jadual kuliah', poster: 'Poster', custom: 'Pengumuman', islam: 'Ramadan & tarikh Islam', tabung: 'Tabung masjid', ayat: 'Ayat Al-Quran' };
+const CYCLE = ['intro', 'scene', 'date', 'kuliah', 'poster', 'islam', 'custom', 'tabung', 'scene', 'ayat', 'poster', 'custom'];
+const SLIDE_NAMES = { intro: 'Intro masjid', scene: 'Gambar masjid', date: 'Tarikh Hijrah', kuliah: 'Jadual kuliah', poster: 'Poster', custom: 'Pengumuman', islam: 'Ramadan & tarikh Islam', tabung: 'Tabung masjid', ayat: 'Ayat Al-Quran' };
 let seq = [], si = -1, ai = Math.floor(Math.random() * AYAT.length), pi = -1, ci = -1, posters = [], slideTimer;
 const customSlides = () => (cfg.slides || []).filter(c => c && (c.t || c.b));
 
@@ -976,6 +1026,8 @@ function nextSlide() {
     };
     probe.src = src;
   }
+  if (k === 'intro') showIntro();
+  $('intro').classList.toggle('on', k === 'intro');
   if (k === 'islam') showIslam(now());
   $('isl').classList.toggle('on', k === 'islam');
   if (k === 'custom') {
@@ -987,7 +1039,7 @@ function nextSlide() {
   report(`${SLIDE_NAMES[k] || k} (${si + 1}/${seq.length})`);
   if (k === 'scene') { prepareScene(); renderScene(state(now()), now()); }
   $('scene').classList.toggle('on', k === 'scene');
-  if (k !== 'scene' && k !== 'islam') for (const key in slides) slides[key].classList.toggle('on', key === k);
+  if (k !== 'scene' && k !== 'islam' && k !== 'intro') for (const key in slides) slides[key].classList.toggle('on', key === k);
   [...$('dots').children].forEach((d, i) => d.classList.toggle('on', i === si));
   const ms = (k === 'scene' ? 2 : k === 'ayat' || k === 'poster' ? 1.6 : 1) * Math.max(5, cfg.slide) * 1000;
   slideTimer = setTimeout(nextSlide, ms);

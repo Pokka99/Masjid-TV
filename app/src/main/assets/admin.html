@@ -181,6 +181,9 @@ details.tip summary{cursor:pointer;color:var(--green);font-weight:600}
     <div class="logoRow"><img id="logoImg" class="hide" alt="Logo"><span id="logoNone" class="hint">Tiada logo, ikon kubah dipapar</span></div>
     <div class="btns2"><label class="btn ghost filebtn">📷 Pilih logo<input type="file" id="logoFile" accept="image/*"></label><button class="btn ghost" id="logoDel">Buang logo</button></div>
     <div class="hint">Tekan Simpan ke TV selepas memilih.</div>
+    <label>Gambar latar slide intro (gambar masjid anda, landskap)</label>
+    <div class="logoRow"><img id="introImg" class="hide" alt="Latar intro"><span id="introNone" class="hint">Tiada gambar, gambar masjid contoh dipapar</span></div>
+    <div class="btns2"><label class="btn ghost filebtn">📷 Pilih gambar<input type="file" id="introFile" accept="image/*"></label><button class="btn ghost" id="introDel">Buang gambar</button></div>
     <label>Nama masjid</label><input id="name">
     <label>Alamat / lokasi</label><input id="addr">
     <label>Kod zon JAKIM</label><input id="zone" autocapitalize="characters" placeholder="cth: TRG04, WLY01, SGR01">
@@ -290,6 +293,7 @@ function fill() {
   posterOff = new Set(cfg.posterOff || []);
   showSwitches();
   showLogo(cfg.logo || '');
+  showIntroBg(cfg.introBg || '');
   showHeaderLogo();
   const L = cfg.live || {};
   $('liveUrl').value = L.url || '';
@@ -310,6 +314,7 @@ function collect() {
       .concat(k.dataset.img ? [k.dataset.img] : []))
     .filter(r => r[2] || r[3]).map(r => r.join(' | ')).join('\n');
   c.logo = logoName;
+  c.introBg = introBgName;
   c.slides = [...$('cslides').children].map(k => ({ t: k.querySelector('input').value.trim(), b: k.querySelector('textarea').value.trim() }))
     .filter(x => x.t || x.b);
   c.posterFull = $('pfullChk').checked;
@@ -362,7 +367,7 @@ function addCustom(c) {
 
 /* ---------- posters ---------- */
 // Slide types the TV rotates through, in its order.
-const SLIDE_TYPES = [['scene', '🕌 Gambar masjid'], ['date', '📅 Tarikh Hijrah'], ['kuliah', '📚 Jadual kuliah'], ['poster', '🖼️ Poster'],
+const SLIDE_TYPES = [['intro', '✨ Intro masjid'], ['scene', '🕌 Gambar masjid'], ['date', '📅 Tarikh Hijrah'], ['kuliah', '📚 Jadual kuliah'], ['poster', '🖼️ Poster'],
   ['islam', '🌙 Ramadan & tarikh Islam'], ['custom', '📝 Pengumuman'], ['tabung', '💰 Tabung'], ['ayat', '📖 Ayat Al-Quran']];
 function showSwitches() {
   const off = new Set(cfg.slidesOff || []);
@@ -438,6 +443,20 @@ $('logoFile').onchange = async e => {
   catch (err) { if (err.message !== 'pin') toast('Gagal: ' + err.message); }
 };
 $('logoDel').onclick = () => { dropImage(logoName); showLogo(''); toast('Tekan Simpan ke TV untuk buang logo'); };
+let introBgName = '';
+function showIntroBg(n) {
+  introBgName = n;
+  $('introImg').classList.toggle('hide', !n); $('introNone').classList.toggle('hide', !!n);
+  if (n) $('introImg').src = '/image/' + encodeURIComponent(n);
+}
+$('introFile').onchange = async e => {
+  const file = e.target.files[0]; e.target.value = '';
+  if (!file) return;
+  toast('Menghantar gambar…');
+  try { dropImage(introBgName); showIntroBg(await uploadImage(file, 1920, 'image/jpeg', false, 'intro')); toast('Gambar sedia. Tekan Simpan ke TV.'); }
+  catch (err) { if (err.message !== 'pin') toast('Gagal: ' + err.message); }
+};
+$('introDel').onclick = () => { dropImage(introBgName); showIntroBg(''); toast('Tekan Simpan ke TV untuk buang gambar'); };
 
 $('pFile').onchange = async e => {
   const files = [...e.target.files];
